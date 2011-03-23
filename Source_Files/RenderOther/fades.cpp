@@ -481,10 +481,10 @@ static void recalculate_and_display_color_table(
 	bool fade_active)
 {
 	bool full_screen= false;
-	
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: set up the OGL queue entry for the liquid effects
 	SetOGLFader(FaderQueue_Liquid);
-	
+#endif
 	/* if a fade effect is active, apply it first */
 	if (fade->fade_effect_type!=NONE)
 	{
@@ -499,20 +499,21 @@ static void recalculate_and_display_color_table(
 		definition->proc(original_color_table, animated_color_table, &definition->color, effect_definition->transparency);
 		original_color_table= animated_color_table;
 	}
-	
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: set up the OGL queue entry for the other effects
 	SetOGLFader(FaderQueue_Other);
-	
+#endif
 	if (type!=NONE)
 	{
 		struct fade_definition *definition= get_fade_definition(type);
 
 		definition->proc(original_color_table, animated_color_table, &definition->color, transparency);	
 		full_screen= (definition->flags&_full_screen_flag) ? true : false;
-
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 		// cancel OGL fader if we've reached the end point for this fade
 		if (!fade_active)
 			SetOGLFader(FaderQueue_Other);
+#endif
 	}
 	
 	// Only do the video-card fader if the OpenGL fader is inactive
@@ -530,6 +531,7 @@ static void tint_color_table(
 	struct rgb_color *color,
 	_fixed transparency)
 {
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: support for OpenGL faders
 	if (CurrentOGLFader)
 	{
@@ -537,7 +539,7 @@ static void tint_color_table(
 		TranslateToOGLFader(*color,transparency);
 		return;
 	}
-
+#endif
 	short i;
 	struct rgb_color *unadjusted= original_color_table->colors;
 	struct rgb_color *adjusted= animated_color_table->colors;
@@ -558,6 +560,7 @@ static void randomize_color_table(
 	struct rgb_color *color,
 	_fixed transparency)
 {
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: support for OpenGL faders
 	if (CurrentOGLFader)
 	{
@@ -569,7 +572,7 @@ static void randomize_color_table(
 		CurrentOGLFader->Color[3] = transparency/float(FIXED_ONE);
 		return;
 	}
-
+#endif
 	short i;
 	struct rgb_color *unadjusted= original_color_table->colors;
 	struct rgb_color *adjusted= animated_color_table->colors;
@@ -598,6 +601,7 @@ static void negate_color_table(
 	struct rgb_color *color,
 	_fixed transparency)
 {
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: support for OpenGL faders
 	if (CurrentOGLFader)
 	{
@@ -605,6 +609,7 @@ static void negate_color_table(
 		TranslateToOGLFader(*color,transparency);
 		return;
 	}
+#endif
 
 	short i;
 	struct rgb_color *unadjusted= original_color_table->colors;
@@ -632,6 +637,7 @@ static void dodge_color_table(
 	struct rgb_color *color,
 	_fixed transparency)
 {
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: support for OpenGL faders
 	if (CurrentOGLFader)
 	{
@@ -639,7 +645,7 @@ static void dodge_color_table(
 		TranslateToOGLFader(*color,transparency);
 		return;
 	}
-
+#endif
 	short i;
 	struct rgb_color *unadjusted= original_color_table->colors;
 	struct rgb_color *adjusted= animated_color_table->colors;
@@ -661,6 +667,7 @@ static void burn_color_table(
 	struct rgb_color *color,
 	_fixed transparency)
 {
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: support for OpenGL faders
 	if (CurrentOGLFader)
 	{
@@ -668,7 +675,7 @@ static void burn_color_table(
 		TranslateToOGLFader(*color,transparency);
 		return;
 	}
-
+#endif
 	short i;
 	struct rgb_color *unadjusted= original_color_table->colors;
 	struct rgb_color *adjusted= animated_color_table->colors;
@@ -691,6 +698,7 @@ static void soft_tint_color_table(
 	struct rgb_color *color,
 	_fixed transparency)
 {
+#ifdef HAVE_OPENGL // Excluding more OGL stuff -- Nigel
 	// LP addition: support for OpenGL faders
 	if (CurrentOGLFader)
 	{
@@ -698,6 +706,7 @@ static void soft_tint_color_table(
 		TranslateToOGLFader(*color,transparency);
 		return;
 	}
+#endif
 
 	short i;
 	struct rgb_color *unadjusted= original_color_table->colors;

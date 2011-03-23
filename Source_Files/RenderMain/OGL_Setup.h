@@ -117,7 +117,7 @@ static inline float sRGB_frob(GLfloat f) {
 		return f;
 	}
 }
-
+#ifdef HAVE_OPENGL // GP2x/Dingoo hack
 void SglColor3f(GLfloat r, GLfloat g, GLfloat b);
 void SglColor3fv(const GLfloat* v);
 void SglColor3ub(GLubyte r, GLubyte g, GLubyte b);
@@ -127,7 +127,7 @@ void SglColor4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 void SglColor4fv(const GLfloat* v);
 void SglColor4fva(const GLfloat* v);
 void SglColor4usv(const GLushort* v);
-
+#endif
 // Initializer; returns whether or not OpenGL is present
 bool OGL_Initialize();
 

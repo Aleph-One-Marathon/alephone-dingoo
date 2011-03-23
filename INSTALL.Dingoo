@@ -1,0 +1,12 @@
+INSTALL
+
+Make sure boost is installed in the dingux toolchain.
+http://code.google.com/p/zxtune/wiki/HowToBuild
+
+Linux users can probably find bjam in their repo, cygwin users can build bjam
+from source (native, doesn't need to go in toolchain!).
+
+After that's been taken care of:
+sh dingoo-configure.sh && make
+
+You'll find the 'alephone' binary in the Source_Files dir if everything went OK.

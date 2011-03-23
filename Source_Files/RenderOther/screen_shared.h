@@ -41,15 +41,15 @@ Jan 25, 2002 (Br'fin (Jeremy Parsons)):
 // include snprintf.h (and snprintf.cpp in the build) when needed.
 #endif
 
-#define DESIRED_SCREEN_WIDTH 640
-#define DESIRED_SCREEN_HEIGHT 480
+#define DESIRED_SCREEN_WIDTH 320 /*640  More screenres stuff -- Nigel */
+#define DESIRED_SCREEN_HEIGHT 240 /*480*/
 
 // Biggest possible of those defined
 #define MAXIMUM_WORLD_WIDTH 1900
 #define MAXIMUM_WORLD_HEIGHT 1200
 
-#define DEFAULT_WORLD_WIDTH 640
-#define DEFAULT_WORLD_HEIGHT 320
+#define DEFAULT_WORLD_WIDTH 320 /*640*/
+#define DEFAULT_WORLD_HEIGHT 160 /*320*/
 
 #include "Console.h"
 #include "screen_drawing.h"
@@ -126,7 +126,9 @@ static struct ScriptHUDElement {
 	int color;
 	char text[Len];
 	Image_Blitter sdl_blitter;
+#ifdef HAVE_OPENGL // GP2x/Dingoo/AnythingnonGLcapable hack... sigh -- Nigel
 	OGL_Blitter ogl_blitter;
+#endif
 } ScriptHUDElements[MAXIMUM_NUMBER_OF_SCRIPT_HUD_ELEMENTS];
 /* /SB */
 
@@ -238,11 +240,15 @@ namespace icon {
 #else
 	srf = SDL_CreateRGBSurfaceFrom(ScriptHUDElements[idx].icon, 16, 16, 32, 64, 0xFF<<16, 0xFF<<8, 0xFF, 0xFF<<24);
 #endif
+#ifdef HAVE_OPENGL // More OpenGL -- Nigel
 	if (OGL_IsActive()) {
 		ScriptHUDElements[idx].ogl_blitter.Load(*srf);
 	} else {
 		ScriptHUDElements[idx].sdl_blitter.Load(*srf);
 	}
+#else
+		ScriptHUDElements[idx].sdl_blitter.Load(*srf);
+#endif
 	SDL_FreeSurface(srf);
   }
 	

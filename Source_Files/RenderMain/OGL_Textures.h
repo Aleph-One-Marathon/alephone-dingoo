@@ -43,6 +43,7 @@ void OGL_StopTextures();
 // Call this after every frame for housekeeping stuff
 void OGL_FrameTickTextures();
 
+#ifdef HAVE_OPENGL // GP2x/Dingoo hack
 // State of an individual texture set:
 struct TextureState
 {
@@ -341,5 +342,6 @@ struct OGL_TexturesStats {
 };
 
 extern OGL_TexturesStats gGLTxStats;
+#endif // HAVE_OPENGL
 
 #endif

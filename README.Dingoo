@@ -1,0 +1,11 @@
+To view my source changes:
+- Get WinMerge or a similar folder compare tool
+- Download the original 20091015 source and compare
+
+Very handy tool. If you can't use it, try the Dingoo.diff.html file.
+
+All changes are commented. Or should be. The few lines of own code I
+inserted may be considered public domain, there's no need to GPLify
+your project or credit if you use the swgamma thingy for example.
+
+- Nigel

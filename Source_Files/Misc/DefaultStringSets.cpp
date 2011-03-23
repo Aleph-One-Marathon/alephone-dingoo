@@ -325,6 +325,7 @@ static const char* sStringSetNumber135[] = {
     "Disconnecting...",
     "Connection Terminated.",
     "%H%M %m.%d.%Y",
+    "", // Dingoo doesn't like a lot of text on the small screen -- Nigel
 };
 
 // STR# Resource: "Join Dialog Messages"

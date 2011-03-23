@@ -117,12 +117,19 @@
 // Defined in shell_misc.cpp
 extern bool CheatsActive;
 
+// We want this one to see if we are in map view or not so we can
+// reassign those Dingoo shoulderbuttons - Nigel.
+extern struct view_data *world_view;
+
+
 // Data directories
 vector <DirectorySpecifier> data_search_path; // List of directories in which data files are searched for
 DirectorySpecifier local_data_dir;    // Local (per-user) data file directory
 DirectorySpecifier preferences_dir;   // Directory for preferences
 DirectorySpecifier saved_games_dir;   // Directory for saved games
 DirectorySpecifier recordings_dir;    // Directory for recordings (except film buffer, which is stored in local_data_dir)
+DirectorySpecifier user_data_path;    // A1 Dingoo path hack -- Nigel
+
 std::string arg_directory;
 
 // Command-line options
@@ -302,7 +309,7 @@ static void initialize_application(void)
 #if defined(unix) || defined(__NetBSD__) || defined(__OpenBSD__) || (defined(__APPLE__) && defined(__MACH__) && !defined(HAVE_BUNDLE_NAME))
 
 	default_data_dir = PKGDATADIR;
-	const char *home = getenv("HOME");
+	const char *home = getenv("PWD"); // GP2x/Dingoo hack - store everything in the A1 dir instead of home
 	if (home)
 		local_data_dir = home;
 	local_data_dir += ".alephone";
@@ -394,12 +401,31 @@ static void initialize_application(void)
 		data_search_path.push_back(local_data_dir);
 	}
 
-	// Subdirectories
+/*	// Subdirectories
 	preferences_dir = local_data_dir;
 	saved_games_dir = local_data_dir + "Saved Games";
-	recordings_dir = local_data_dir + "Recordings";
+	recordings_dir = local_data_dir + "Recordings"; */
+
+	// We definitely don't want the savegames to mix up on the Dingoo, begin hack -- Nigel
+	const char *userdata_env = getenv("ALEPHONE_USERDATA");
+	if (userdata_env)
+	{
+		user_data_path = userdata_env;
+		data_search_path.push_back(user_data_path);
+		preferences_dir = user_data_path;
+		saved_games_dir = user_data_path + "Saved Games";
+		recordings_dir = user_data_path + "Recordings";
+	}
+	else
+	{
+		preferences_dir = local_data_dir;
+		saved_games_dir = local_data_dir + "Saved Games";
+		recordings_dir = local_data_dir + "Recordings";
+	}
+	// End Dingoo hack, continues a bit further down
 
 	// Create local directories
+	preferences_dir.CreateDirectory(); // Part of dingoo per-game-subdir hack
 	local_data_dir.CreateDirectory();
 	saved_games_dir.CreateDirectory();
 	recordings_dir.CreateDirectory();
@@ -407,12 +433,16 @@ static void initialize_application(void)
 	DirectorySpecifier local_mml_dir = bundle_data_dir + "MML";
 #else
 	DirectorySpecifier local_mml_dir = local_data_dir + "MML";
+	if (userdata_env) // Continue dingoo per-game-subdir hack
+		local_mml_dir = user_data_path + "MML";
 #endif
 	local_mml_dir.CreateDirectory();
 #if defined(HAVE_BUNDLE_NAME)
 	DirectorySpecifier local_themes_dir = bundle_data_dir + "Themes";
 #else
 	DirectorySpecifier local_themes_dir = local_data_dir + "Themes";
+	if (userdata_env) // Continue dingoo per-game-subdir hack, no more dirs after this
+		local_themes_dir = user_data_path + "Themes";
 #endif
 	local_themes_dir.CreateDirectory();
 	// Setup resource manager
@@ -807,6 +837,26 @@ static void handle_game_key(const SDL_Event &event)
 				}
 			}
 		}
+		// Overhead map zooming Dingoo hack
+		// Obviously disables whatever other functions the shoulder buttons are
+		// assigned to when in map view - Nigel
+		else if (world_view->overhead_map_active && (key == SDLK_TAB || key == SDLK_BACKSPACE))
+		{
+			if (key == SDLK_BACKSPACE)
+			{
+				if (zoom_overhead_map_in())
+					PlayInterfaceButtonSound(Sound_ButtonSuccess());
+				else
+					PlayInterfaceButtonSound(Sound_ButtonFailure());
+			}
+			else if (key == SDLK_TAB)
+			{
+				if (zoom_overhead_map_out())
+					PlayInterfaceButtonSound(Sound_ButtonSuccess());
+				else
+					PlayInterfaceButtonSound(Sound_ButtonFailure());
+			}
+		}
 		else if (key == input_preferences->shell_keycodes[_key_volume_up])
 		{
 			changed_prefs = SoundManager::instance()->AdjustVolumeUp(_snd_adjust_volume);
@@ -820,7 +870,7 @@ static void handle_game_key(const SDL_Event &event)
 			walk_player_list();
 			render_screen(NONE);
 		}
-		else if (key == input_preferences->shell_keycodes[_key_zoom_in])
+		/* else if (key == input_preferences->shell_keycodes[_key_zoom_in])
 		{
 			if (zoom_overhead_map_in())
 				PlayInterfaceButtonSound(Sound_ButtonSuccess());
@@ -833,7 +883,7 @@ static void handle_game_key(const SDL_Event &event)
 				PlayInterfaceButtonSound(Sound_ButtonSuccess());
 			else
 				PlayInterfaceButtonSound(Sound_ButtonFailure());
-		}
+		} */
 		else if (key == input_preferences->shell_keycodes[_key_inventory_left])
 		{
 			if (player_controlling_game()) {
@@ -1093,7 +1143,35 @@ static void process_game_key(const SDL_Event &event)
 			stop_interface_fade();
 		int item = -1;
 		switch (event.key.keysym.sym) {
-		case SDLK_n:
+		// Nigel: START dirty use-menu-without-mouse hack
+		case SDLK_RETURN: // Dingoo button START
+			item = iNewGame;
+			break;
+		case SDLK_LSHIFT: // A
+			item = iLoadGame;
+			break;
+		case SDLK_g:
+			item = iGatherGame;
+			break;
+		case SDLK_j:
+			item = iJoinGame;
+			break;
+		case SDLK_SPACE: // X
+			item = iPreferences;
+			break;
+		case SDLK_r:
+			item = iReplaySavedFilm;
+			break;
+		case SDLK_c:
+			item = iCredits;
+			break;
+		case SDLK_ESCAPE: // SELECT
+			item = iQuit;
+			break;
+		case SDLK_F9:
+			dump_screen();
+			break;
+/*		case SDLK_n:
 			item = iNewGame;
 			break;
 		case SDLK_o:
@@ -1134,6 +1212,8 @@ static void process_game_key(const SDL_Event &event)
 				toggle_fullscreen();
 			}
 			break;
+*/
+		// Nigel: END dirty use-menu-without-mouse hack
 		default:
 			break;
 		}

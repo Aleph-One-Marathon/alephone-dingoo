@@ -73,6 +73,8 @@ extern bool get_text_resource_from_scenario(int resource_number, LoadedResource&
 extern SDL_Surface *picture_to_surface(LoadedResource &rsrc);
 
 // Rescale/tile surface
+extern SDL_Surface *dingoo_downscale(SDL_Surface *s); // Dingoo 50% downscaler - Nigel
+
 extern SDL_Surface *rescale_surface(SDL_Surface *s, int width, int height);
 extern SDL_Surface *tile_surface(SDL_Surface *s, int width, int height);
 #endif

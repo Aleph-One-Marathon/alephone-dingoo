@@ -591,6 +591,7 @@ XML_ElementParser *OpenGL_GetParser()
 	return &OpenGL_Parser;
 }
 
+#ifdef HAVE_OPENGL // GP2x/Dingoo hack
 /* These don't belong here */
 void SglColor3f(GLfloat r, GLfloat g, GLfloat b) {
   GLfloat ov[3] = {sRGB_frob(r), sRGB_frob(g), sRGB_frob(b)};
@@ -636,3 +637,4 @@ void SglColor4usv(const GLushort* iv) {
   GLfloat ov[4] = {sRGB_frob(iv[0]*(1.f/65535.f)), sRGB_frob(iv[1]*(1.f/65535.f)), sRGB_frob(iv[2]*(1.f/65535.f)), iv[3]};
   glColor4fv(ov);
 }
+#endif

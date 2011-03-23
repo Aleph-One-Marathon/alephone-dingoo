@@ -124,8 +124,8 @@ Jan 25, 2002 (Br'fin (Jeremy Parsons)):
 
 #define LABEL_INSET 3
 #define LOG_DURATION_BEFORE_TIMEOUT (2*TICKS_PER_SECOND)
-#define BORDER_HEIGHT 18
-#define BORDER_INSET 9
+#define BORDER_HEIGHT 16 // 18 - Does what it says, but also affects text on top/bottom borders. - Nigel
+#define BORDER_INSET 9 //9 - No damn clue about this, nothing to do with top/bottom borders. -Nigel
 #define FUDGE_FACTOR 1
 
 #define MAC_LINE_END 13
@@ -161,7 +161,8 @@ enum
 	_acknowledgement_message,
 	_disconnecting_message,
 	_connection_terminated_message,
-	_date_format
+	_date_format,
+	_nothing_at_all // Dingoo doesn't like a lot of text on the small screen. -- Nigel
 };
 
 #define TERMINAL_IS_DIRTY(term) ((term)->flags & _terminal_is_dirty)
@@ -1221,7 +1222,47 @@ static void display_picture(
 #ifdef mac
 		picture = PicHandle(PictRsrc.GetHandle());
 #else
-		s = picture_to_surface(PictRsrc);
+//		s = picture_to_surface(PictRsrc);
+
+		// terminal picture hack - This will obviously fail miserably on other platforms (relies on getvideosurface returning 16 bit and what not) - Nigel
+//		SDL_Surface *s;
+		SDL_Surface *sorig = picture_to_surface(PictRsrc);
+		//printf("width=%d height=%d\n", sorig->w, sorig->h);
+		if (SDL_GetVideoSurface()->format->BytesPerPixel == 2) // On 16 bit we want smooth, convert 8 bit term pics to 16!
+		{
+			SDL_Surface *s2 = SDL_ConvertSurface(sorig, SDL_GetVideoSurface()->format, SDL_SWSURFACE);
+			// Add pixels to make surface height/width even (175x61 becomes 176x62). Using the scaler for other purposes,
+			// would hate to slow it down by adding uneven pixel support.
+			if (sorig->w%2 == 1 || sorig->h%2 == 1)
+			{
+				int evenwidth, evenheight;
+				evenwidth = sorig->w;
+				evenheight = sorig->h;
+
+				if (evenwidth%2 == 1)
+					evenwidth = evenwidth + 1;
+				if (evenheight%2 == 1)
+					evenheight = evenheight + 1;
+
+				SDL_Surface *s3 = SDL_CreateRGBSurface(SDL_SWSURFACE,evenwidth,evenheight,s2->format->BitsPerPixel, s2->format->Rmask, s2->format->Gmask, s2->format->Bmask, s2->format->Amask);
+				// SDL_FillRect(s3, NULL, 0x000000); // black, appears to be SDL default so unneeded.
+
+				SDL_BlitSurface(s2, NULL, s3, NULL);
+				SDL_FreeSurface(s2);
+
+				s = dingoo_downscale(s3);
+				SDL_FreeSurface(s3);
+			}
+			else
+			{
+				s = dingoo_downscale(s2);
+				SDL_FreeSurface(s2);
+			}
+		}
+		else // 8 bit, 32 bit would've crashed the dingoo by now :D
+		{
+			s = dingoo_downscale(sorig);
+		} // end hack
 	}
 	if (s)
 	{
@@ -1235,26 +1276,32 @@ static void display_picture(
 		bounds.left = bounds.top = 0;
 		bounds.right = s->w;
 		bounds.bottom = s->h;
-
-		int pict_header_width = get_pict_header_width(PictRsrc);
+// This code prevents below centering code to use updated surface data, no, it reverts to the original width instead! Killing it - Nigel
+/*		int pict_header_width = get_pict_header_width(PictRsrc);
 		bool cinemascopeHack = false;
 		if (bounds.right != pict_header_width)
 		{
 			cinemascopeHack = true;
 			bounds.right = pict_header_width;
-		}
+		} */
 #endif
 		OffsetRect(&bounds, -bounds.left, -bounds.top);
 		calculate_bounds_for_object(frame, flags, &screen_bounds, &bounds);
 
-		if(RECTANGLE_WIDTH(&bounds)<=RECTANGLE_WIDTH(&screen_bounds) && 
+
+		 // centering code. "doesn't fit" fucks up by adjusting top offset. We're just forcing the normal method. -- Nigel.
+		OffsetRect(&bounds, screen_bounds.left+(RECTANGLE_WIDTH(&screen_bounds)-RECTANGLE_WIDTH(&bounds))/2,
+			screen_bounds.top+(RECTANGLE_HEIGHT(&screen_bounds)-RECTANGLE_HEIGHT(&bounds))/2);
+		// end hack
+/*		if(RECTANGLE_WIDTH(&bounds)<=RECTANGLE_WIDTH(&screen_bounds) &&
 			RECTANGLE_HEIGHT(&bounds)<=RECTANGLE_HEIGHT(&screen_bounds))
 		{
-			/* It fits-> center it. */
+			// It fits-> center it.
 			OffsetRect(&bounds, screen_bounds.left+(RECTANGLE_WIDTH(&screen_bounds)-RECTANGLE_WIDTH(&bounds))/2,
 				screen_bounds.top+(RECTANGLE_HEIGHT(&screen_bounds)-RECTANGLE_HEIGHT(&bounds))/2);
+
 		} else {
-			/* Doesn't fit.  Make it, but preserve the aspect ratio like a good little boy */
+			// Doesn't fit.  Make it, but preserve the aspect ratio like a good little boy
 			if(RECTANGLE_HEIGHT(&bounds)-RECTANGLE_HEIGHT(&screen_bounds)>=
 				RECTANGLE_WIDTH(&bounds)-RECTANGLE_WIDTH(&screen_bounds))
 			{
@@ -1265,7 +1312,7 @@ static void display_picture(
 				InsetRect(&bounds, (RECTANGLE_WIDTH(&screen_bounds)-adjusted_width)/2, 0);
 				// dprintf("Warning: Not large enough for pict: %d (height);g", picture_id);
 			} else {
-				/* Width is the predominant factor */
+				// Width is the predominant factor
 				short adjusted_height;
 				
 				adjusted_height= RECTANGLE_WIDTH(&screen_bounds)*RECTANGLE_HEIGHT(&bounds)/RECTANGLE_WIDTH(&bounds);
@@ -1274,7 +1321,7 @@ static void display_picture(
 				// dprintf("Warning: Not large enough for pict: %d (width);g", picture_id);
 			}
 		}
-
+*/
 //		warn(HGetState((Handle) picture) & 0x40); // assert it is purgable.
 
 #if defined(mac)
@@ -1283,16 +1330,19 @@ static void display_picture(
 		HUnlock((Handle) picture);
 #elif defined(SDL)
 		SDL_Rect r = {bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top};
-		if ((s->w == r.w && s->h == r.h) || cinemascopeHack)
-			SDL_BlitSurface(s, NULL, /*world_pixels*/draw_surface, &r);
+
+// Don't want below code to rescale if not needed, though I suspect it never did -- Nigel
+		SDL_BlitSurface(s, NULL, draw_surface, &r);
+/*		if ((s->w == r.w && s->h == r.h) || cinemascopeHack)
+				SDL_BlitSurface(s, NULL, draw_surface, &r);
 		else {
 			// Rescale picture
 			SDL_Surface *s2 = rescale_surface(s, r.w, r.h);
 			if (s2) {
-				SDL_BlitSurface(s2, NULL, /*world_pixels*/draw_surface, &r);
+				SDL_BlitSurface(s2, NULL, draw_surface, &r);
 				SDL_FreeSurface(s2);
 			}
-		}
+		} */
 		SDL_FreeSurface(s);
 #endif
 		/* And let the caller know where we drew the picture */
@@ -1459,20 +1509,24 @@ static void draw_terminal_borders(
 	{
 		case _logon_group:
 			top_message= _computer_starting_up;
-			bottom_left_message= _computer_manufacturer;
+			//bottom_left_message= _computer_manufacturer;
+			bottom_left_message = _nothing_at_all; // Not fitting on the Dingoo.
 			bottom_right_message= _computer_address;
 			break;
 			
 		case _logoff_group:
 			top_message= _disconnecting_message;
 			bottom_left_message= _computer_manufacturer;
-			bottom_right_message= _computer_address;
+			//bottom_right_message= _computer_address;
+			bottom_right_message = _nothing_at_all; // Not fitting on the Dingoo.
 			break;
 
 		default:			
 			top_message= _computer_terminal;
-			bottom_left_message= _scrolling_message;
-			bottom_right_message= _acknowledgement_message;
+			//bottom_left_message= _scrolling_message;
+			bottom_left_message = _nothing_at_all; // Not fitting on the Dingoo.
+			//bottom_right_message= _acknowledgement_message;
+			bottom_right_message = _nothing_at_all;
 			break;
 	}
 
@@ -1502,22 +1556,40 @@ static void draw_terminal_borders(
 		border.left += LABEL_INSET; border.right -= LABEL_INSET;
 		getcstr(temporary, strCOMPUTER_LABELS, top_message);
 		_draw_screen_text(temporary, (screen_rectangle *) &border, _center_vertical, _computer_interface_font, _computer_border_text_color);
-		get_date_string(temporary);
+/*		get_date_string(temporary);
 		_draw_screen_text(temporary, (screen_rectangle *) &border, _right_justified | _center_vertical, 
-			_computer_interface_font, _computer_border_text_color);
+			_computer_interface_font, _computer_border_text_color); Doesn't fit on dingoo, let's move it bottom right -- Nigel */
 	
 		/* Draw the the bottom rectangle & text */
 		border= frame;
 		border.top= border.bottom-BORDER_HEIGHT;
 		_fill_screen_rectangle((screen_rectangle *) &border, _computer_border_background_text_color);
 		border.left += LABEL_INSET; border.right -= LABEL_INSET;
-		getcstr(temporary, strCOMPUTER_LABELS, bottom_left_message);
+/*		getcstr(temporary, strCOMPUTER_LABELS, bottom_left_message);
 		_draw_screen_text(temporary, (screen_rectangle *) &border, _center_vertical, _computer_interface_font, 
 			_computer_border_text_color);
 		getcstr(temporary, strCOMPUTER_LABELS, bottom_right_message);
 		_draw_screen_text(temporary, (screen_rectangle *) &border, _right_justified | _center_vertical, 
-			_computer_interface_font, _computer_border_text_color);
-	
+			_computer_interface_font, _computer_border_text_color); */
+
+		// Begin Dingoo hack -- Nigel
+		if (bottom_right_message != _nothing_at_all || bottom_left_message != _nothing_at_all)
+		{
+			getcstr(temporary, strCOMPUTER_LABELS, bottom_left_message);
+			_draw_screen_text(temporary, (screen_rectangle *) &border, _center_vertical, _computer_interface_font,
+					_computer_border_text_color);
+			getcstr(temporary, strCOMPUTER_LABELS, bottom_right_message);
+			_draw_screen_text(temporary, (screen_rectangle *) &border, _right_justified | _center_vertical,
+					_computer_interface_font, _computer_border_text_color);
+		}
+		else
+		{
+			get_date_string(temporary);
+			_draw_screen_text(temporary, (screen_rectangle *) &border, _right_justified | _center_vertical,
+					_computer_interface_font, _computer_border_text_color);
+		}
+		// END Dingoo hack
+
 		// LP change: done with stuff for after the other rendering
 	}
 	
@@ -1744,7 +1816,7 @@ static void goto_terminal_group(
 				Rect text_bounds, bounds;
 	
 				/* The only thing we care about is the width. */
-				SetRect(&bounds, 0, 0, 640, 480);
+				SetRect(&bounds, 0, 0, /*640, 480*/ 320,240 /* Dingoo hack -- Nigel */);
 				InsetRect(&bounds, BORDER_INSET, BORDER_HEIGHT+BORDER_INSET);
 				calculate_bounds_for_text_box(&bounds, current_group->flags, &text_bounds);
 				terminal_data->maximum_line= count_total_lines(get_text_base(terminal_text),
@@ -1761,7 +1833,7 @@ static void goto_terminal_group(
 				terminal_data->maximum_line= current_group->maximum_line_count;
 			} else {
 				/* Calculate this for ourselves. */
-				short width= 640; // еее sync (Must guarantee 100 high res!)
+				short width= /*640*/ 320; // еее sync (Must guarantee 100 high res!) // Uh, no 640 on the Dingoo... -- Nigel
 	
 				width-= 2*(72-BORDER_INSET); /* 1 inch in from each side */				
 				terminal_data->maximum_line= count_total_lines(get_text_base(terminal_text), 
@@ -2581,7 +2653,7 @@ static void calculate_maximum_lines_for_groups(
 					Rect text_bounds, bounds;
 		
 					/* The only thing we care about is the width. */
-					SetRect(&bounds, 0, 0, 640, 480);
+					SetRect(&bounds, 0, 0, /*640, 480*/ 320,240); // Dingoo hack -- Nigel
 					InsetRect(&bounds, BORDER_INSET, BORDER_HEIGHT+BORDER_INSET);
 					calculate_bounds_for_text_box(&bounds, groups[index].flags, &text_bounds);
 					groups[index].maximum_line_count= count_total_lines(text_base,
@@ -2592,7 +2664,7 @@ static void calculate_maximum_lines_for_groups(
 				
 			case _information_group:
 				{
-					short width= 640; // еее sync (Must guarantee 100 high res!)
+					short width= /*640*/ 320; // еее sync (Must guarantee 100 high res!) // Dingoo hack -- Nigel
 	
 					width-= 2*(72-BORDER_INSET); /* 1 inch in from each side */				
 					groups[index].maximum_line_count= count_total_lines(text_base, 

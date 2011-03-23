@@ -1404,10 +1404,10 @@ void w_progress_bar::set_progress(int inValue, int inMaxValue)
  *  Slider
  */
 
-const int SLIDER_WIDTH = 160;
-const int SLIDER_THUMB_HEIGHT = 14;
-const int SLIDER_THUMB_WIDTH = 8;
-const int SLIDER_TROUGH_HEIGHT = 8;
+const int SLIDER_WIDTH = 80; //160; Dingoo interface hack -- Nigel.
+const int SLIDER_THUMB_HEIGHT = 7;//14;
+const int SLIDER_THUMB_WIDTH = 4; //8;
+const int SLIDER_TROUGH_HEIGHT = 4; //8;
 
 w_slider::w_slider(int num, int s) : widget(LABEL_WIDGET), selection(s), num_items(num), thumb_dragging(false)
 {
@@ -1562,7 +1562,8 @@ int w_slider::thumb_width() const
 
 w_list_base::w_list_base(uint16 width, size_t lines, size_t /*sel*/) : widget(ITEM_WIDGET), num_items(0), shown_items(lines), thumb_dragging(false)
 {
-	rect.w = width;
+	// rect.w = width;
+	rect.w = width>>1; // Dingoo list hack, makes save dialogs etc fit on screen, they're specced @ 400 everywhere, 200 is enough tho - Nigel
 	rect.h = item_height() * static_cast<uint16>(shown_items) + get_theme_space(LIST_WIDGET, T_SPACE) + get_theme_space(LIST_WIDGET, B_SPACE);
 
 	frame_tl = get_theme_image(LIST_WIDGET, DEFAULT_STATE, TL_IMAGE);

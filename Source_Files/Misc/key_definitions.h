@@ -73,12 +73,15 @@ struct key_definition
 static struct key_definition standard_key_definitions[]=
 {
 #ifdef SDL
-	/* keypad */
-	{SDLK_KP8, _moving_forward},
+	/* keypad */ // Some Dingoo defaults - Nigel
+/*	{SDLK_KP8, _moving_forward},
 	{SDLK_KP5, _moving_backward},
 	{SDLK_KP4, _turning_left},
-	{SDLK_KP6, _turning_right},
-	
+	{SDLK_KP6, _turning_right},*/
+	{SDLK_UP, _moving_forward},
+	{SDLK_DOWN, _moving_backward},
+	{SDLK_LEFT, _turning_left},
+	{SDLK_RIGHT, _turning_right},
 	/* zx translation */
 	{SDLK_z, _sidestepping_left},
 	{SDLK_x, _sidestepping_right},
@@ -93,24 +96,32 @@ static struct key_definition standard_key_definitions[]=
 	{SDLK_v, _looking_center},
 	
 	/* KP7/KP9 for weapon cycling */
-	{SDLK_KP7, _cycle_weapons_backward},
+//	{SDLK_KP7, _cycle_weapons_backward},
+	{SDLK_RETURN, _cycle_weapons_backward},
 	{SDLK_KP9, _cycle_weapons_forward},
-	
+
 	/* space for primary trigger, option for alternate trigger */
-	{SDLK_SPACE, _left_trigger_state},
+/*	{SDLK_SPACE, _left_trigger_state},
+	{SDLK_LALT, _right_trigger_state},*/
+	{SDLK_LCTRL, _left_trigger_state},
 	{SDLK_LALT, _right_trigger_state},
 	
 	/* shift, control and command modifiers */
-	{SDLK_LSHIFT, _sidestep_dont_turn},
+/*	{SDLK_LSHIFT, _sidestep_dont_turn},
 	{SDLK_LCTRL, _run_dont_walk},
-	{SDLK_LMETA, _look_dont_turn},
+	{SDLK_LMETA, _look_dont_turn},*/
+	{SDLK_BACKSPACE, _sidestep_dont_turn},
+	{SDLK_LSHIFT, _run_dont_walk},
+	{SDLK_TAB, _look_dont_turn},
 	
 	/* tab for action */
-	{SDLK_TAB, _action_trigger_state},
+	//{SDLK_TAB, _action_trigger_state},
+	{SDLK_SPACE, _action_trigger_state},
 
 	/* m for toggle between normal and overhead map view */
-	{SDLK_m, _toggle_map},
-	
+	/*{SDLK_m, _toggle_map},*/
+	{SDLK_PAUSE, _toggle_map},
+
 	/* ` for using the microphone */
 	{SDLK_BACKQUOTE, _microphone_button}
 #else

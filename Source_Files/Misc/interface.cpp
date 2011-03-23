@@ -23,7 +23,7 @@
 
 	Friday, July 8, 1994 2:32:44 PM (alain)
 		All old code in here is obsolete. This now has interface for the top-level
-		interface (Begin Game, etcÉ)
+		interface (Begin Game, etcï¿½)
 	Saturday, September 10, 1994 12:45:48 AM  (alain)
 		the interface gutted again. just the stuff that handles the menu though, the rest stayed
 		the same.
@@ -796,7 +796,7 @@ bool join_networked_resume_game()
                         }
                         else
                         {
-                                /* Tell the user theyÕre screwed when they try to leave this level. */
+                                /* Tell the user theyÃ•re screwed when they try to leave this level. */
                                 // ZZZ: should really issue a different warning since the ramifications are different
                                 alert_user(infoError, strERRORS, cantFindMap, 0);
         
@@ -1145,7 +1145,7 @@ bool idle_game_state(uint32 time)
 		game_state.last_ticks_on_idle= machine_tick_count();
 	}
 
-	/* if weÕre not paused and thereÕs something to draw (i.e., anything different from
+	/* if weÃ•re not paused and thereÃ•s something to draw (i.e., anything different from
 		last time), render a frame */
 	if(game_state.state==_game_in_progress)
 	{
@@ -1727,7 +1727,9 @@ static void draw_button(
 	screen_rectangle *screen_rect= get_interface_rectangle(index);
 	short pict_resource_number= MAIN_MENU_BASE + pressed;
 
-	set_drawing_clip_rectangle(screen_rect->top, screen_rect->left, screen_rect->bottom, screen_rect->right);
+	// 320x240 Dingoo hack: Main menu: This is only graphical - pressed and unpressed areas (buttons, logo).
+	//set_drawing_clip_rectangle(screen_rect->top, screen_rect->left, screen_rect->bottom, screen_rect->right);
+	set_drawing_clip_rectangle(screen_rect->top>>1, screen_rect->left>>1, screen_rect->bottom>>1, screen_rect->right>>1);
 	
 	/* Use this to avoid the fade.. */
 	draw_full_screen_pict_resource_from_images(pict_resource_number);
@@ -2370,15 +2372,23 @@ static void handle_interface_menu_screen_click(
 		return; // fixes click-through movie bug
 #endif
 
+// More resolution stuff. This time, main menu clickable areas -- Nigel
 #ifdef SDL
-	xoffset = (SDL_GetVideoSurface()->w - 640) / 2;
-	yoffset = (SDL_GetVideoSurface()->h - 480) / 2;
+//	xoffset = (SDL_GetVideoSurface()->w - 640) / 2;
+//	yoffset = (SDL_GetVideoSurface()->h - 480) / 2;
 #endif
 
 	/* find it.. */
 	for(index= _new_game_button_rect; index<NUMBER_OF_INTERFACE_RECTANGLES; ++index)
 	{
 		screen_rect= get_interface_rectangle(index);
+		// BEGIN 320x240 Dingoo hack: get_interface_rect stuff is used elsewhere (HUD),
+		// have to resort to these. These are the mouse clickable main menu areas -- Nigel
+		screen_rect->top = screen_rect->top>>1;
+		screen_rect->left = screen_rect->left>>1;
+		screen_rect->bottom = screen_rect->bottom>>1;
+		screen_rect->right = screen_rect->right>>1;
+		// END hack
 		if (point_in_rectangle(x - xoffset, y - yoffset, screen_rect))
 			break;
 	}
@@ -2393,6 +2403,13 @@ static void handle_interface_menu_screen_click(
 			stop_interface_fade();
 
 			screen_rect= get_interface_rectangle(index);
+			// BEGIN 320x240 Dingoo hack: get_interface_rect stuff is used elsewhere (HUD),
+			// have to resort to these. These are the mouse clickable main menu areas -- Nigel
+			screen_rect->top = screen_rect->top>>1;
+			screen_rect->left = screen_rect->left>>1;
+			screen_rect->bottom = screen_rect->bottom>>1;
+			screen_rect->right = screen_rect->right>>1;
+			// END hack
 
 			/* Draw it initially depressed.. */
 			draw_button(index, last_state);

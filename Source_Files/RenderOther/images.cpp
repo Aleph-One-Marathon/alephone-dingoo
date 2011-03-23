@@ -753,6 +753,58 @@ static void rescale(T *src_pixels, int src_pitch, T *dst_pixels, int dst_pitch, 
 	}
 }
 
+// Downscales h/w 50%, smooth box for 16 bit, fast & ugly for 8 bit images. Just drops uneven row if any is passed. - Nigel
+// 7bdf <- 555 // f7df/fbef <- 565 // 0x0410
+#define AVERAGE(a, b) (Uint16)((a) == (b) ? (a) : (((a) & 0xf7deU) + ((b) & 0xf7deU)) >> 1 )
+SDL_Surface *dingoo_downscale(SDL_Surface *s)
+{
+	Uint16 dstw = s->w>>1;
+	Uint16 dsth = s->h>>1;
+
+	uint32 dx = (s->w << 16) / dstw;
+	uint32 dy = (s->h << 16) / dsth;
+
+	SDL_Surface *s2 = SDL_CreateRGBSurface(SDL_SWSURFACE, dstw, dsth, s->format->BitsPerPixel, s->format->Rmask, s->format->Gmask, s->format->Bmask, s->format->Amask);
+
+	if (s->format->BytesPerPixel == 1) // 8 bit, use built-in scaler which is fast enough.
+		rescale((pixel8 *)s->pixels, s->pitch, (pixel8 *)s2->pixels, s2->pitch, dstw, dsth, dx, dy);
+	else if (s->format->BytesPerPixel == 2) // 16 bit, fast yet smooth scaling in this mode.
+	{
+		// Setup 4 pointers to the source pixel data
+		Uint16* Sourcet1 = (unsigned short *)s->pixels;
+		Uint16* Sourcet2 = (unsigned short *)s->pixels + 1;
+		Uint16* Sourceb1 = (unsigned short *)s->pixels + s->w;
+		Uint16* Sourceb2 = (unsigned short *)s->pixels + s->w + 1;
+
+		// And 1 to the destination.
+		Uint16* Target = (unsigned short *)s2->pixels;
+
+		Uint16 t, b;
+
+		for (int cury = 0; cury < dsth; cury++)
+		{
+			for (int curx = 0; curx < dstw; curx++)
+			{
+				t = AVERAGE(*Sourcet1, *Sourcet2);
+				b = AVERAGE(*Sourceb1, *Sourceb2);
+				*Target = AVERAGE(b, t);
+				Sourcet1 +=2; Sourcet2 +=2; Sourceb1 +=2; Sourceb2 += 2;
+				Target++;
+			}
+			Sourcet1 += s->w; Sourcet2 += s->w; Sourceb1 += s->w; Sourceb2 += s->w;
+			if (s->w%4 != 0) // WHY?! This is driving me crazy, I know this fixes this code but what goes wrong in the first place and how does this fix it!?
+				Target++;
+		}
+	}
+	else if (s->format->BytesPerPixel == 4) // 32 bit, not supported on Dingoo. Left in just in case.
+		rescale((pixel32 *)s->pixels, s->pitch, (pixel32 *)s2->pixels, s2->pitch, dstw, dsth, dx, dy);
+
+	if (s->format->palette) // Restore palette.
+		SDL_SetColors(s2, s->format->palette->colors, 0, s->format->palette->ncolors);
+
+	return s2;
+}
+
 SDL_Surface *rescale_surface(SDL_Surface *s, int width, int height)
 {
 	if (s == NULL)
@@ -849,7 +901,20 @@ SDL_Surface *tile_surface(SDL_Surface *s, int width, int height)
 static void draw_picture(LoadedResource &rsrc)
 {
 	// Convert picture resource to surface, free resource
-	SDL_Surface *s = picture_to_surface(rsrc);
+	//SDL_Surface *s = picture_to_surface(rsrc);
+	// Start native 320 hack for menus and scenario pics -- Nigel
+		SDL_Surface *sorig = picture_to_surface(rsrc);
+		SDL_Surface *s;
+		if (sorig->format->BytesPerPixel == 1 && SDL_GetVideoSurface()->format->BytesPerPixel == 1) // Nice downscaling on 8 bit images in 16 bit mode, exploiting fix below.
+			s = dingoo_downscale(sorig);
+		else { // Weird 16 bit value? I don't know. The 16 bit scaler craps out on whatever it receives from this. 555 instead of 565 perhaps. Calling convertsurface on any since these are menus and such anyway.
+			SDL_Surface *sorig2 = SDL_ConvertSurface(sorig, SDL_GetVideoSurface()->format, SDL_SWSURFACE);
+			s = dingoo_downscale(sorig2);
+			SDL_FreeSurface(sorig2);
+		}
+		SDL_FreeSurface(sorig);
+	// End native 320 hack
+
 	if (s == NULL)
 		return;
 	SDL_Surface *video = SDL_GetVideoSurface();
@@ -868,10 +933,10 @@ static void draw_picture(LoadedResource &rsrc)
 	if (draw_clip_rect_active) {
 		src_rect.w = dst_rect.w = draw_clip_rect.right - draw_clip_rect.left;
 		src_rect.h = dst_rect.h = draw_clip_rect.bottom - draw_clip_rect.top;
-		src_rect.x = draw_clip_rect.left - (640 - s->w) / 2;
-		src_rect.y = draw_clip_rect.top - (480 - s->h) / 2;
-		dst_rect.x += draw_clip_rect.left- (640 - s->w) / 2;
-		dst_rect.y += draw_clip_rect.top - (480 - s->h) / 2;
+		src_rect.x = draw_clip_rect.left - (/*640*/ 320 - s->w) / 2; // Menu hack --Nigel
+		src_rect.y = draw_clip_rect.top - (/*480*/ 240 - s->h) / 2;
+		dst_rect.x += draw_clip_rect.left- (/*640*/ 320 - s->w) / 2;
+		dst_rect.y += draw_clip_rect.top - (/*480*/ 240 - s->h) / 2;
 	} else {
 		// Clear destination to black
 		SDL_FillRect(video, NULL, SDL_MapRGB(video->format, 0, 0, 0));
@@ -928,15 +993,27 @@ void scroll_full_screen_pict_resource_from_scenario(int pict_resource_number, bo
 	// Convert picture resource to surface, free resource
 	LoadedResource rsrc;
 	get_picture_resource_from_scenario(pict_resource_number, rsrc);
-	SDL_Surface *s = picture_to_surface(rsrc);
+//	SDL_Surface *s = picture_to_surface(rsrc);
+	// Start native 320 hack for menus and scenario pics -- Nigel
+		SDL_Surface *sorig = picture_to_surface(rsrc);
+		SDL_Surface *s;
+		if (sorig->format->BytesPerPixel == 1 && SDL_GetVideoSurface()->format->BytesPerPixel == 1) // Nice downscaling on 8 bit images in 16 bit mode, exploiting fix below.
+			s = dingoo_downscale(sorig);
+		else { // Weird 16 bit value? I don't know. The 16 bit scaler craps out on whatever it receives from this. 555 instead of 565 perhaps. Calling convertsurface on any since these are menus and such anyway.
+			SDL_Surface *sorig2 = SDL_ConvertSurface(sorig, SDL_GetVideoSurface()->format, SDL_SWSURFACE);
+			s = dingoo_downscale(sorig2);
+			SDL_FreeSurface(sorig2);
+		}
+		SDL_FreeSurface(sorig);
+	// End native 320 hack
 	if (s == NULL)
 		return;
 
 	// Find out in which direction to scroll
 	int picture_width = s->w;
 	int picture_height = s->h;
-	int screen_width = 640;
-	int screen_height = 480;
+	int screen_width = SDL_GetVideoSurface()->w;
+	int screen_height = SDL_GetVideoSurface()->h;
 	bool scroll_horizontal = picture_width > screen_width;
 	bool scroll_vertical = picture_height > screen_height;
 

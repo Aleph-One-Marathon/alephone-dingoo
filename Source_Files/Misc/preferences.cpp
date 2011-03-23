@@ -671,9 +671,14 @@ static void player_dialog(void *arg)
  *  Handle graphics dialog
  */
 
+/* Changing this for Dingoo to remove 32 bit, hope I can get away with these -- Nigel
 static const char *depth_labels[4] = {
 	"8 Bit", "16 Bit", "32 Bit", NULL
+};*/
+static const char *depth_labels[3] = {
+	"8 Bit", "16 Bit", NULL
 };
+
 
 static const char *resolution_labels[3] = {
 	"Low", "High", NULL
@@ -2284,13 +2289,14 @@ static void *get_environment_pref_data() {return environment_preferences;}
  *  Setup default preferences
  */
 
+// Some defaults changed for Dingoo -- Nigel
 static void default_graphics_preferences(graphics_preferences_data *preferences)
 {
   memset(&preferences->screen_mode, '\0', sizeof(screen_mode_data));
 	preferences->screen_mode.gamma_level= DEFAULT_GAMMA_LEVEL;
 
-	preferences->screen_mode.width = 640;
-	preferences->screen_mode.height = 480;
+	preferences->screen_mode.width = 320; //640;
+	preferences->screen_mode.height = 240; //480; Hopefully enables extra mods to run without manual prefs file...
 	preferences->screen_mode.hud = true;
 	preferences->screen_mode.hud_scale_level = 0;
 	preferences->screen_mode.term_scale_level = 0;
@@ -2318,8 +2324,8 @@ static void default_graphics_preferences(graphics_preferences_data *preferences)
 	
 	OGL_SetDefaults(preferences->OGL_Configure);
 
-	preferences->double_corpse_limit= false;
-	preferences->hog_the_cpu = false;
+	preferences->double_corpse_limit= true; //false;
+	preferences->hog_the_cpu = true; //false;
 
 	preferences->software_alpha_blending = _sw_alpha_off;
 

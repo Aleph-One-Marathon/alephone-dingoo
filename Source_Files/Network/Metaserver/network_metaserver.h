@@ -27,6 +27,7 @@
 
 #include "metaserver_messages.h" // RoomDescription
 
+#include <stdexcept> // Dingoo hack, necessary for compiler -- Nigel
 #include <exception>
 #include <vector>
 #include <map>
