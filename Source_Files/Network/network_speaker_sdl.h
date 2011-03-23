@@ -37,6 +37,8 @@
 
 #ifndef NETWORK_SPEAKER_SDL_H
 #define NETWORK_SPEAKER_SDL_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include    "cseries.h"
 
@@ -66,5 +68,5 @@ NetworkSpeakerSoundBufferDescriptor* dequeue_network_speaker_data();
 
 // Called by sound playback routines to return storage-buffers to the freequeue
 void release_network_speaker_buffer(byte* inBuffer);
-
+#endif //disable_networking
 #endif // NETWORK_SPEAKER_SDL_H

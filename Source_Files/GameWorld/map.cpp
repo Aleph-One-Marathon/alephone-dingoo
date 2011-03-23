@@ -826,7 +826,9 @@ void remove_map_object(
 	}
 
 	SoundManager::instance()->OrphanSound(object_index);
+#ifdef HAVE_LUA // GP2x/Dingoo hack
 	L_Invalidate_Object(object_index);
+#endif
 	*next_object= object->next_object;
 	MARK_SLOT_AS_FREE(object);
 }

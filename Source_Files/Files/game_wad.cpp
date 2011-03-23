@@ -490,9 +490,9 @@ void set_saved_game_name_to_default()
 	revert_game_data.SavedGame += getcstr(temporary, strFILENAMES, filenameDEFAULT_SAVE_GAME);
 #endif
 }
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 extern void ResetPassedLua();
-
+#endif
 bool new_game(
 	short number_of_players, 
 	bool network,
@@ -502,9 +502,9 @@ bool new_game(
 {
 	short player_index, i;
 	bool success= true;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	ResetPassedLua();
-
+#endif
 	/* Make sure our code is synchronized.. */
 	assert(MAXIMUM_PLAYER_START_NAME_LENGTH==MAXIMUM_PLAYER_NAME_LENGTH);
 
@@ -746,9 +746,9 @@ bool get_entry_points(vector<entry_point> &vec, int32 type)
 
 	return success;
 }
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 extern void LoadSoloLua();
-
+#endif
 /* This is called when the game level is changed somehow */
 /* The only thing that has to be valid in the entry point is the level_index */
 
@@ -792,6 +792,7 @@ bool goto_level(
 		// textures to load.
 		// Being careful to carry over errors so that Pfhortran errors can be ignored
 		short SavedType, SavedError = get_game_error(&SavedType);
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 		if (!game_is_networked || use_map_file(((game_info *) NetGetGameData())->parent_checksum))
 		{
 			RunLevelScript(entry->level_number);
@@ -800,8 +801,13 @@ bool goto_level(
 		{
 			ResetLevelScript();
 		}
+#else
+	RunLevelScript(entry->level_number);
+#endif
 		RunScriptChunks();
+#ifdef HAVE_LUA // gp2x/dingoo hack
 		if (!game_is_networked) LoadSoloLua();
+#endif
 		Music::instance()->PreloadLevelMusic();
 		set_game_error(SavedType,SavedError);
 		
@@ -1132,9 +1138,9 @@ extern bool load_game_from_file(FileSpecifier& File);
 bool load_game_from_file(FileSpecifier& File)
 {
 	bool success= false;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	ResetPassedLua();
-	
+#endif
 	/* Setup for a revert.. */
 	revert_game_data.game_is_from_disk = true;
 	revert_game_data.SavedGame = File;
@@ -1157,7 +1163,9 @@ bool load_game_from_file(FileSpecifier& File)
 			short SavedType, SavedError = get_game_error(&SavedType);
 			RunLevelScript(dynamic_world->current_level_number);
 			RunScriptChunks();
+#ifdef HAVE_LUA // gp2x/dingoo hack
 			if (!game_is_networked) LoadSoloLua();
+#endif
 			set_game_error(SavedType,SavedError);
 		}
 		else
@@ -1462,9 +1470,9 @@ static void scan_and_add_platforms(
 	}
 }
 
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 extern void unpack_lua_states(uint8*, size_t);
-
+#endif
 /* Load a level from a wad-> mainly used by the net stuff. */
 bool process_map_wad(
 	struct wad_data *wad, 
@@ -1637,6 +1645,7 @@ bool process_map_wad(
 	data= (uint8 *)extract_type_from_wad(wad, MMLS_TAG, &data_length);
 	SetMMLS(data, data_length);
 
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	/* Extract LUAS */
 	data= (uint8 *)extract_type_from_wad(wad, LUAS_TAG, &data_length);
 	SetLUAS(data, data_length);
@@ -1644,7 +1653,7 @@ bool process_map_wad(
 	/* Extract saved Lua state */
 	data =(uint8 *)extract_type_from_wad(wad, LUA_STATE_TAG, &data_length);
 	unpack_lua_states(data, data_length);
-
+#endif
 	// LP addition: load the physics-model chunks (all fixed-size)
 	bool PhysicsModelLoaded = false;
 	
@@ -2113,10 +2122,10 @@ static uint8 *export_tag_to_global_array_and_size(
 
 	return array;
 }
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 extern size_t save_lua_states();
 extern void pack_lua_states(uint8*, size_t);
-		
+#endif
 
 /* the sizes are the sizes to save in the file, be aware! */
 static uint8 *tag_to_global_array_and_size(
@@ -2241,10 +2250,14 @@ static uint8 *tag_to_global_array_and_size(
 			GetMMLS(count);
 			break;
 	        case LUAS_TAG:
+#ifdef HAVE_LUA // gp2x/dingoo hack
 			GetLUAS(count);
+#endif
 			break;
 		case LUA_STATE_TAG:
+#ifdef HAVE_LUA // gp2x/dingoo hack
 			count= save_lua_states();
+#endif
 			break;
 		default:
 			assert(false);
@@ -2356,17 +2369,21 @@ static uint8 *tag_to_global_array_and_size(
 		case WEAPONS_PHYSICS_TAG:
 			pack_weapon_definition(array,count);
 			break;
-	        case SHAPE_PATCH_TAG:
+	    case SHAPE_PATCH_TAG:
 			memcpy(array, get_shapes_patch_data(count), count);
 			break;
-	        case MMLS_TAG:
+	    case MMLS_TAG:
 			memcpy(array, GetMMLS(count), count);
 			break;
-	        case LUAS_TAG:
-			memcpy(array, GetLUAS(count), count);
-			break;
+	    case LUAS_TAG:
+#ifdef HAVE_LUA // gp2x/dingoo hack
+        	memcpy(array, GetLUAS(count), count);
+#endif
+        	break;
 		case LUA_STATE_TAG:
+#ifdef HAVE_LUA // gp2x/dingoo hack
 			pack_lua_states(array, count);
+#endif
 			break;
 		default:
 			assert(false);
@@ -2515,9 +2532,13 @@ void level_has_embedded_physics_lua(int Level, bool& HasPhysics, bool& HasLua)
 				extract_type_from_wad(wad, PHYSICS_PHYSICS_TAG, &data_length);
 				HasPhysics = data_length > 0;
 
+#ifdef HAVE_LUA // gp2x/dingoo hack
 				extract_type_from_wad(wad, LUAS_TAG, &data_length);
 				HasLua = data_length > 0;
 				free_wad(wad);
+#else
+				HasLua = false;
+#endif
 			}
 		}
 		close_wad_file(MapFile);

@@ -27,6 +27,8 @@
 
 #ifndef	NETWORK_DIALOG_WIDGETS_SDL_H
 #define	NETWORK_DIALOG_WIDGETS_SDL_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "sdl_widgets.h"
 #include "SSLP_API.h"
@@ -234,5 +236,5 @@ private:
     vector<entry_point> mEntryPoints;
 };
 
-
+#endif //disable_networking
 #endif//NETWORK_DIALOG_WIDGETS_SDL_H

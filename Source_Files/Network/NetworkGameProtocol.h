@@ -25,6 +25,8 @@
 
 #ifndef NETWORKGAMEPROTOCOL_H
 #define NETWORKGAMEPROTOCOL_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "network_private.h"
 
@@ -48,5 +50,5 @@ public:
 	virtual void    UpdateUnconfirmedActionFlags() = 0;
 	
 };
-
+#endif //disable_networking
 #endif // NETWORKGAMEPROTOCOL_H

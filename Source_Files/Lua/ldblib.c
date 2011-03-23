@@ -3,6 +3,8 @@
 ** Interface from Lua to its debug API
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #include <stdio.h>
@@ -395,3 +397,4 @@ LUALIB_API int luaopen_debug (lua_State *L) {
   return 1;
 }
 
+#endif

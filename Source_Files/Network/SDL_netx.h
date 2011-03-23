@@ -25,6 +25,8 @@
 
 #ifndef	SDL_NETX_H
 #define	SDL_NETX_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 // Officially, to be more SDL-like, we ought to arrange our structures with particular alignment,
 // specify C-style linkage, etc.  I don't think that's important at this point, but should anyone be
@@ -54,5 +56,5 @@ int	SDLNetx_DisableBroadcast(UDPsocket inSocket);
 //            inPacket->status - status result of the broadcast Send call on the last interface
 int	SDLNetx_UDP_Broadcast(UDPsocket inSocket, UDPpacket* inPacket);
 
-
+#endif //disable_networking
 #endif//SDL_NETX_H

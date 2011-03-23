@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 #ifndef __LUA_PROJECTILES_H
 #define __LUA_PROJECTILES_H
 /*
@@ -50,4 +52,5 @@ int Lua_Projectiles_register(lua_State *L);
 
 #endif
 
+#endif
 #endif

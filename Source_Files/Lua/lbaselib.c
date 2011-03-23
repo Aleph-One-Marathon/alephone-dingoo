@@ -4,6 +4,8 @@
 ** See Copyright Notice in lua.h
 */
 
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #include <ctype.h>
@@ -641,3 +643,4 @@ LUALIB_API int luaopen_base (lua_State *L) {
   return 2;
 }
 
+#endif

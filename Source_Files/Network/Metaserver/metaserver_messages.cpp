@@ -22,6 +22,7 @@
 	Created.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"

@@ -20,6 +20,8 @@
 	A pool for non-blocking outbound TCP connections
 
 */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "ConnectPool.h"
 
@@ -172,3 +174,4 @@ ConnectPool::~ConnectPool()
 // 	}
 }
 	
+#endif // disablenetworking

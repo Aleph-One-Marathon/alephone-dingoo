@@ -24,6 +24,8 @@
  *
  *  Written in 2001 by Christian Bauer
  */
+#include "config.h"
+#ifdef HAVE_OPENGL
 
 #ifndef _HUD_RENDERER_OGL_H_
 #define _HUD_RENDERER_OGL_H_
@@ -57,4 +59,5 @@ protected:
 	void DisableClipPlane(void);
 };
 
+#endif
 #endif

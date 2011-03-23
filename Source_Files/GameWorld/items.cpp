@@ -147,7 +147,11 @@ short new_item(
 	if (dynamic_world->player_count>1)
 	{
 		if (definition->invalid_environments & _environment_network) add_item= false;
-		if (get_item_kind(type)==_ball && !current_game_has_balls()) add_item= false;
+		if (get_item_kind(type)==_ball
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
+				&& !current_game_has_balls()
+#endif
+		) add_item= false;
 	} 
 	else
 	{
@@ -178,9 +182,11 @@ short new_item(
 			
 			/* let PLACEMENT.C keep track of how many there are */
 			object_was_just_added(_object_is_item, type);
+#ifdef HAVE_LUA // GP2x/Dingoo hack
 			// and let Lua know too
 			L_Call_Item_Created(object_index);
- 		}
+#endif
+		}
 	}
 	else
 	{
@@ -583,12 +589,13 @@ bool try_and_add_player_item(
 	
 	//CP Addition: call any script traps available
 	// jkvw: but only if we actually got the item
+#ifdef HAVE_LUA // GP2x/Dingoo hack
 	if (success)
 	{
 		//MH: Call Lua script hook
 		L_Call_Got_Item(type, player_index);
 	}
-
+#endif
 	/* Play the pickup sound */
 	if (success && player_index==current_player_index)
 	{

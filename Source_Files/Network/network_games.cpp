@@ -24,6 +24,7 @@ Jul 1, 2000 (Loren Petrich):
 	Added Benad's changes
 */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"
@@ -84,11 +85,12 @@ enum { // for capture the flag.
 static bool player_has_ball(short player_index, short color);
 extern void destroy_players_ball(short player_index);
 
+#ifdef HAVE_LUA // gp2x/dingoo hack
 // for script controlled compass
 extern bool use_lua_compass[MAXIMUM_NUMBER_OF_NETWORK_PLAYERS];
 extern world_point2d lua_compass_beacons[MAXIMUM_NUMBER_OF_NETWORK_PLAYERS];
 extern short lua_compass_states[MAXIMUM_NUMBER_OF_NETWORK_PLAYERS];
-
+#endif
 /* ------------------ code */
 int32 get_player_net_ranking(
 	short player_index,
@@ -128,7 +130,7 @@ int32 get_player_net_ranking(
 		case _game_of_cooperative_play:
 			ranking= total_monster_damage ? (100*monster_damage)/total_monster_damage : 0;
 			break;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	case _game_of_custom:
 		switch(GetLuaScoringMode()) {
 	  case _game_of_most_points:
@@ -141,7 +143,7 @@ int32 get_player_net_ranking(
 	    break;
 	  }
 	  break;
-
+#endif
 		case _game_of_capture_the_flag:
 			ranking= player->netgame_parameters[_flag_pulls];
 			break;
@@ -224,6 +226,7 @@ int32 get_team_net_ranking(short team, short *kills, short *deaths,
     case _game_of_kill_monsters:
       ranking = (*kills)-(*deaths);
       break;
+#ifdef HAVE_LUA // gp2x/dingoo hack
     case _game_of_custom:
 	    switch(GetLuaScoringMode()) {
       case _game_of_most_points:
@@ -235,7 +238,8 @@ int32 get_team_net_ranking(short team, short *kills, short *deaths,
 	ranking = -team_netgame_parameters[team][_points_scored];
 	break;
       }
-      break;
+#endif
+	  break;
     case _game_of_cooperative_play:
       ranking = total_monster_damage ? (100*monster_damage)/total_monster_damage : 0;
       break;
@@ -343,7 +347,7 @@ short get_network_compass_state(
 {
 	short state= _network_compass_all_off;
 	world_point2d *beacon= (world_point2d *) NULL;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
         if (use_lua_compass [player_index])
         {
                 if (lua_compass_states [player_index] & _network_compass_use_beacon)
@@ -353,7 +357,8 @@ short get_network_compass_state(
         }
 	else
 	{
-                switch (GET_GAME_TYPE())
+#endif
+			switch (GET_GAME_TYPE())
                 {
                         case _game_of_king_of_the_hill: // where’s the hill
                         // Benad
@@ -410,8 +415,9 @@ short get_network_compass_state(
                                 }
                                 break;
                 }
-        }
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
+		}
+#endif
 	if (beacon)
 	{        
 		struct player_data *player= get_player_data(player_index);
@@ -689,7 +695,7 @@ void calculate_ranking_text(
 		case _game_of_rugby:
 			sprintf(buffer, "%ld", ranking);
 			break;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	case _game_of_custom:
 		switch(GetLuaScoringMode()) {
 	  case _game_of_most_points:
@@ -705,7 +711,7 @@ void calculate_ranking_text(
 	    break;
 	  }
 	  break;
-			
+#endif
 		case _game_of_cooperative_play:
 			sprintf(buffer, "%ld%%", ranking);
 			break;
@@ -754,7 +760,7 @@ void calculate_ranking_text_for_post_game(
 		case _game_of_kill_monsters:
 		case _game_of_cooperative_play:
 			break;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	case _game_of_custom:
 		switch(GetLuaScoringMode()) {
 	  case _game_of_most_points:
@@ -773,7 +779,7 @@ void calculate_ranking_text_for_post_game(
 	    break;
 	  }
 	  break;
-			
+#endif
 		case _game_of_capture_the_flag:
 			getcstr(format, strNETWORK_GAME_STRINGS, flagPullsFormatString);
 			sprintf(buffer, format, ranking);
@@ -811,7 +817,7 @@ bool get_network_score_text_for_postgame(
 		case _game_of_cooperative_play:
 			string_id= NONE;
 			break;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	case _game_of_custom:
 		switch(GetLuaScoringMode()) {
 	  case _game_of_most_points:
@@ -824,7 +830,7 @@ bool get_network_score_text_for_postgame(
 	    break;
 	  }
 	  break;
-			
+#endif
 		case _game_of_capture_the_flag:
 			string_id= flagsCapturedString;
 			break;
@@ -948,6 +954,7 @@ bool game_is_over(
 	{
 		game_over= true;
 	}
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	else if(GetLuaGameEndCondition() == _game_end_now_condition)
 	  {
 	    game_over = true;
@@ -956,6 +963,7 @@ bool game_is_over(
 	  {
 	    game_over = false;
 	  }
+#endif
 	else if(GET_GAME_OPTIONS() & _game_has_kill_limit) 
 	{
 		short player_index;

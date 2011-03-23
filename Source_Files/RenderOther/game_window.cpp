@@ -516,9 +516,9 @@ void ensure_HUD_buffer(void) {
 /*
  *  Draw HUD (to HUD surface)
  */
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 extern int LuaTexturePaletteSize();
-
+#endif
 void draw_panels(void)
 {
 	if (alephone::Screen::instance()->openGL())
@@ -539,10 +539,14 @@ void draw_panels(void)
 
 	if (!hud_pict_not_found) {
 		SDL_Rect dst_rect = {0, 320, 640, 160};
+#ifdef HAVE_LUA // gp2x/dingoo hack
 		if (!LuaTexturePaletteSize())
 			SDL_BlitSurface(static_hud_pict, NULL, HUD_Buffer, &dst_rect);
 		else
 			SDL_FillRect(HUD_Buffer, &dst_rect, 0);
+#else
+		SDL_BlitSurface(static_hud_pict, NULL, HUD_Buffer, &dst_rect);
+#endif
 	}
 
 	// Add dynamic elements

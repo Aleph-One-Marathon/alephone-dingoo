@@ -20,6 +20,8 @@
 	Checks for updates online
 
 */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "Update.h"
 #include "SDL_net.h"
@@ -137,5 +139,6 @@ int Update::Thread()
 		return 5;
 	}
 }
+#endif // disablenetworking
 
 

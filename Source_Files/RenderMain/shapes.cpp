@@ -1697,7 +1697,9 @@ void load_collections(
 				unload_collection(header);
 			}
 			OGL_UnloadModelsImages(collection_index);
+#ifndef HAVE_DINGOO // sw alpha dingoo exclude -- Nigel
 			SW_Texture_Extras::instance()->Unload(collection_index);
+#endif
 		}
 		else
 		{
@@ -1751,6 +1753,7 @@ void load_collections(
 	update_color_environment(is_opengl);
 
 	// load software enhancements
+#ifndef HAVE_DINGOO // sw alpha dingoo exclude -- Nigel
 	if (!is_opengl) {
 		for (collection_index= 0, header= collection_headers; collection_index < MAXIMUM_COLLECTIONS; ++collection_index, ++header)
 		{
@@ -1760,6 +1763,7 @@ void load_collections(
 			}
 		}
 	}
+#endif
 //	if (with_progress_bar)
 //		close_progress_dialog();
 }

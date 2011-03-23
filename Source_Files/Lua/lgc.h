@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Garbage Collector
@@ -107,4 +109,5 @@ LUAI_FUNC void luaC_barrierf (lua_State *L, GCObject *o, GCObject *v);
 LUAI_FUNC void luaC_barrierback (lua_State *L, Table *t);
 
 
+#endif
 #endif

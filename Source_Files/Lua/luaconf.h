@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Configuration file for Lua
@@ -760,3 +762,4 @@ union luai_Cast { double l_d; long l_l; };
 
 #endif
 
+#endif

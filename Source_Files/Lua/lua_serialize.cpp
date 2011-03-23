@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_SERIALIZE.CPP
 
@@ -303,3 +305,4 @@ bool lua_restore(lua_State *L, std::streambuf* sb)
 	lua_remove(L, -2);
 	return true;
 }
+#endif

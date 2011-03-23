@@ -333,8 +333,9 @@ void RunScriptChunks()
 		header >> length;
 		if (offset + length > luas_chunk.size())
 			break;
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 		LoadLuaScript(reinterpret_cast<char *>(&luas_chunk[offset]), length, _embedded_lua_script);
+#endif
 		offset += length;
 	}
 }

@@ -33,7 +33,7 @@ Jan 25, 2002 (Br'fin (Jeremy Parsons)):
  Aug 6, 2003 (Woody Zenfell):
 	Minor tweaks to screen_printf() mechanism (safer; resets when screen_reset called)
 */
-
+#include "config.h"
 #include <stdarg.h>
 #ifndef HAVE_SNPRINTF
 #include "snprintf.h"	// for platforms that don't have it
@@ -41,15 +41,24 @@ Jan 25, 2002 (Br'fin (Jeremy Parsons)):
 // include snprintf.h (and snprintf.cpp in the build) when needed.
 #endif
 
-#define DESIRED_SCREEN_WIDTH 320 /*640  More screenres stuff -- Nigel */
-#define DESIRED_SCREEN_HEIGHT 240 /*480*/
-
+#ifdef HAVE_DINGOO // More screenres stuff -- Nigel
+#define DESIRED_SCREEN_WIDTH 320 
+#define DESIRED_SCREEN_HEIGHT 240
+#else
+#define DESIRED_SCREEN_WIDTH 640
+#define DESIRED_SCREEN_HEIGHT 480
+#endif
 // Biggest possible of those defined
 #define MAXIMUM_WORLD_WIDTH 1900
 #define MAXIMUM_WORLD_HEIGHT 1200
 
-#define DEFAULT_WORLD_WIDTH 320 /*640*/
-#define DEFAULT_WORLD_HEIGHT 160 /*320*/
+#ifdef HAVE_DINGOO // More screenres stuff -- Nigel
+#define DEFAULT_WORLD_WIDTH 320
+#define DEFAULT_WORLD_HEIGHT 160
+#else
+#define DEFAULT_WORLD_WIDTH 640
+#define DEFAULT_WORLD_HEIGHT 320
+#endif
 
 #include "Console.h"
 #include "screen_drawing.h"
@@ -456,10 +465,12 @@ static void update_fps_display(SDL_Surface *s)
 		else
 		{
 			float count = (FRAME_SAMPLE_SIZE * MACHINE_TICKS_PER_SECOND) / float(ticks-frame_ticks[frame_index]);
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 			int latency = NetGetLatency();
 			if (latency > -1)
 				sprintf(ms, "(%i ms)", latency);
 			else
+#endif
 				ms[0] = '\0';
 							
 			if (count >= TICKS_PER_SECOND)
@@ -687,6 +698,8 @@ static const SDL_Color Gray = { 0x7f, 0x7f, 0x7f };
 
 static void DisplayScores(SDL_Surface *s)
 {
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
+
 	if (!game_is_networked || !ShowScores) return;
 
 	// assume a proportional font
@@ -813,6 +826,9 @@ static void DisplayScores(SDL_Surface *s)
 
 		Y += Font.LineSpacing;
 	}
+#else
+	return;
+#endif
 }
 
 static void set_overhead_map_status( /* it has changed, this is the new status */

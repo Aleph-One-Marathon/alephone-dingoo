@@ -23,6 +23,8 @@
 	Checks for updates online
 
 */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include <string>
 #include <SDL_thread.h>
@@ -59,5 +61,5 @@ private:
 	SDL_Thread *m_thread;
 
 };
-
+#endif // disablenetworking
 #endif

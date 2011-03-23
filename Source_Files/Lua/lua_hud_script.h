@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 
 #ifndef LUA_HUD_SCRIPT_H
 #define LUA_HUD_SCRIPT_H
@@ -38,4 +40,5 @@ void CloseLuaHUDScript();
 void MarkLuaHUDCollections(bool loading);
 
 
+#endif
 #endif

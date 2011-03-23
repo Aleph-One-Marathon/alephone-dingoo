@@ -3,6 +3,8 @@
 ** Auxiliary functions for building Lua libraries
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #include <ctype.h>
@@ -651,3 +653,4 @@ LUALIB_API lua_State *luaL_newstate (void) {
   return L;
 }
 
+#endif

@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Buffered streams
@@ -64,4 +66,5 @@ struct Zio {
 
 LUAI_FUNC int luaZ_fill (ZIO *z);
 
+#endif
 #endif

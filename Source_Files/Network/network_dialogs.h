@@ -36,6 +36,7 @@ Mar 1, 2002 (Woody Zenfell):
 
 #ifndef NETWORK_DIALOGS_H
 #define	NETWORK_DIALOGS_H
+#include "config.h"
 
 #include    "player.h"  // for MAXIMUM_NUMBER_OF_PLAYERS
 #include    "network.h"
@@ -287,6 +288,7 @@ struct NetgameOutcomeData
 /* ---------------------- globals */
 extern struct net_rank rankings[MAXIMUM_NUMBER_OF_PLAYERS];
 
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 
 //class MetaserverClient;
 //class GlobalMetaserverChatNotificationAdapter;
@@ -528,5 +530,5 @@ extern void draw_kill_bars(NetgameOutcomeData &outcome, struct net_rank *ranks, 
 	short suicide_index, bool do_totals, bool friendly_fire);
 extern void draw_score_bars(NetgameOutcomeData &outcome, struct net_rank *ranks, short bar_count);
 
-
+#endif //disable_networking
 #endif//NETWORK_DIALOGS_H

@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
  Created 5-20-03 by Matthew Hielscher
  Controls the loading and execution of Lua scripts.
@@ -1905,3 +1907,4 @@ void unpack_lua_states(uint8* data, size_t length)
 	}
 }
 #endif /* HAVE_LUA */
+#endif

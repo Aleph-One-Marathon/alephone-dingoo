@@ -23,6 +23,8 @@
 	A pool for non-blocking outbound TCP connections
 
 */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"
 #include "CommunicationsChannel.h"
@@ -95,3 +97,4 @@ private:
 };
 
 #endif
+#endif // disable_networking

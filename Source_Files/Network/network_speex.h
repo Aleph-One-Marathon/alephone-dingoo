@@ -25,6 +25,8 @@
 
 #ifndef __NETWORK_SPEEX_H
 #define __NETWORK_SPEEX_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"
 #ifdef SPEEX
@@ -43,5 +45,5 @@ void destroy_speex_encoder();
 void init_speex_decoder();
 void destroy_speex_decoder();
 #endif //def SPEEX
-
+#endif //enable_networking
 #endif

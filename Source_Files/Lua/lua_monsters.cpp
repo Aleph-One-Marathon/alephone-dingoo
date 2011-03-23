@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_MONSTERS.CPP
 
@@ -921,4 +923,5 @@ static void compatibility(lua_State *L)
 
 
 
+#endif
 #endif

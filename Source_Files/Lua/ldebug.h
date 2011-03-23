@@ -3,6 +3,8 @@
 ** Auxiliary functions from Debug Interface module
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 #ifndef ldebug_h
 #define ldebug_h
@@ -30,4 +32,5 @@ LUAI_FUNC void luaG_errormsg (lua_State *L);
 LUAI_FUNC int luaG_checkcode (const Proto *pt);
 LUAI_FUNC int luaG_checkopenop (Instruction i);
 
+#endif
 #endif

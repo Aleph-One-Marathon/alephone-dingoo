@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Interface to Memory Manager
@@ -47,3 +49,4 @@ LUAI_FUNC void *luaM_growaux_ (lua_State *L, void *block, int *size,
 
 #endif
 
+#endif

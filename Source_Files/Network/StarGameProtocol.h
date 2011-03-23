@@ -25,6 +25,8 @@
 
 #ifndef STARGAMEPROTOCOL_H
 #define STARGAMEPROTOCOL_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "NetworkGameProtocol.h"
 
@@ -53,5 +55,6 @@ public:
 
 extern void DefaultStarPreferences();
 extern void WriteStarPreferences(FILE* F);
+#endif // disablenetworking
 
 #endif // STARGAMEPROTOCOL_H

@@ -103,7 +103,9 @@ void SetupParseTree()
 #ifdef SDL
 	MarathonParser.AddChild(Theme_GetParser());
 #endif
+#ifndef HAVE_DINGOO // sw alpha dingoo exclude -- Nigel
 	MarathonParser.AddChild(SW_Texture_Extras_GetParser());
+#endif
 	MarathonParser.AddChild(Console_GetParser());
 	MarathonParser.AddChild(ExternalDefaultLevelScript_GetParser());
 }

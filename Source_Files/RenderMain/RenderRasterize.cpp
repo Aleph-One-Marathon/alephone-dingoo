@@ -34,6 +34,7 @@ Sep 2, 2000 (Loren Petrich):
 	then suppress the void for the boundary's texture.
 */
 
+#include "config.h" // For Eclipse... -- Nigel
 #include "cseries.h"
 
 #include "map.h"
@@ -69,10 +70,11 @@ void RenderRasterizerClass::render_tree()
 	vector<sorted_node_data>::iterator node;
 	// LP: reference to simplify the code
 	vector<sorted_node_data>& SortedNodes = RSPtr->SortedNodes;
-	
+
+#ifndef HAVE_DINGOO	// Attempting to find media clip bug -- Nigel // EDIT: Not here, though transparent liquids won't work so leaving it out for now...
 	// LP change: added support for semitransparent liquids
 	bool SeeThruLiquids = get_screen_mode()->acceleration == _opengl_acceleration ? TEST_FLAG(Get_OGL_ConfigureData().Flags,OGL_Flag_LiqSeeThru) : graphics_preferences->software_alpha_blending != _sw_alpha_off;
-	
+#endif
 	/* walls, ceilings, interior objects, floors, exterior objects for all nodes, back to front */
 	for (node= SortedNodes.begin(); node != SortedNodes.end(); ++node)
 	{
@@ -110,8 +112,13 @@ void RenderRasterizerClass::render_tree()
 		
 		/* if necessary, replace the ceiling or floor surfaces with the media surface */
 		// LP change: don't do this step if liquids are semitransparent
+#ifndef HAVE_DINGOO
 		if (media && !SeeThruLiquids)
 		{
+#else
+		if (media)
+		{
+#endif
 			// LP change: moved this get upwards
 			// struct media_data *media= get_media_data(polygon->media_index);
 			horizontal_surface_data *media_surface= NULL;
@@ -143,13 +150,14 @@ void RenderRasterizerClass::render_tree()
 				media_surface->transfer_mode_data= 0;
 			}
 		}
+#ifndef HAVE_DINGOO 	// Attempting to find media clip bug -- Nigel // EDIT: Not here, though transparent liquids won't work so leaving it out for now...
 		// LP change: always render liquids that are semitransparent
 		else if (!SeeThruLiquids)
 		{
 			// if weÕre trying to draw a polygon without media from under a polygon with media, donÕt
 			if (view->under_media_boundary) continue;
 		}
-		
+#endif
 		// LP: this loop renders the walls
 		for (window= node->clipping_windows; window; window= window->next_window)
 		{
@@ -256,7 +264,7 @@ void RenderRasterizerClass::render_tree()
 				}
 			}
 		}
-
+#ifndef HAVE_DINGOO 	// Attempting to find media clip bug -- Nigel // EDIT: Not here, though transparent liquids won't work so leaving it out for now...
 		// LP: this is for objects on the other side of the liquids;
 		// render them out here if one can see through the liquids
 		if (SeeThruLiquids)
@@ -267,7 +275,7 @@ void RenderRasterizerClass::render_tree()
 				render_node_object(object, true);
 			}
 		}
-		
+
 		// LP: render the liquid surface after the walls and the stuff behind it
 		// and before the stuff before it.
 		if (media && SeeThruLiquids)
@@ -293,7 +301,7 @@ void RenderRasterizerClass::render_tree()
 				}
 			}
 		}
-		
+#endif
 		// LP: this is for objects on the view side of the liquids
 		/* render exterior objects (with their own clipping windows) */
 		for (object= node->exterior_objects; object; object= object->next_object)
@@ -561,6 +569,7 @@ void RenderRasterizerClass::render_node_object(
 		// Models will have their own liquid-surface clipping,
 		// so don't edit their clip rects
 		// This is bitwise XOR, but is presumably OK here
+#ifndef HAVE_DINGOO // **THIS** is what caused the media clipping bug! Guess that XOR wasn't OK after all on MIPS, or perhaps the problem lies elsewhere. Removing the other side check solves it tho  -- Nigel
 		if (view->under_media_boundary ^ other_side_of_media)
 		{
 			// Clipping: below a liquid surface
@@ -577,7 +586,16 @@ void RenderRasterizerClass::render_node_object(
 			else
 				object->rectangle.clip_bottom= MIN(object->rectangle.clip_bottom, object->ymedia);
 		}
-		
+#else
+		if (view->under_media_boundary)
+		{
+			object->rectangle.clip_top= MAX(object->rectangle.clip_top, object->ymedia);
+		}
+		else
+		{
+			object->rectangle.clip_bottom= MIN(object->rectangle.clip_bottom, object->ymedia);
+		}
+#endif
 		// LP: added OpenGL support
 		// LP: using rasterizer object
 		RasPtr->texture_rectangle(object->rectangle);

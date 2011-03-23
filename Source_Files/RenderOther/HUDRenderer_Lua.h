@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 #ifndef _HUD_RENDERER_LUA_H_
 #define _HUD_RENDERER_LUA_H_
 /*
@@ -94,4 +96,5 @@ protected:
 HUD_Lua_Class *Lua_HUDInstance();
 void Lua_DrawHUD(short time_elapsed);
 
+#endif
 #endif

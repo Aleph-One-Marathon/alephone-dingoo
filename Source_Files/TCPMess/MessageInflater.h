@@ -28,6 +28,8 @@
 
 #ifndef MESSAGEINFLATER_H
 #define MESSAGEINFLATER_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include <map>
 
@@ -47,5 +49,5 @@ private:
 	typedef std::map<MessageTypeID, Message*> MessageInflaterMap;
 	MessageInflaterMap	mMap;
 };
-
+#endif // disablenetworking
 #endif // MESSAGEINFLATER_H

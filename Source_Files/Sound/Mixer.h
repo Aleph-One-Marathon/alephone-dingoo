@@ -91,8 +91,9 @@ public:
 	void StopSoundResource();
 
 private:
-        Mixer() : sNetworkAudioBufferDesc(0) { };
-	
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
+	Mixer() : sNetworkAudioBufferDesc(0) { };
+#endif
 	static Mixer *m_instance;
 	
 	struct Channel {
@@ -144,9 +145,9 @@ private:
 
 	static void MixerCallback(void *user, uint8 *stream, int len);
 	void Callback(uint8 *stream, int len);
-
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 	NetworkSpeakerSoundBufferDescriptor* sNetworkAudioBufferDesc;
-
+#endif
 	inline bool IsNetworkAudioPlaying() { return channels[sound_channel_count + NETWORK_AUDIO_CHANNEL].active; }
 
 

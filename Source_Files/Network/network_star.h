@@ -23,6 +23,8 @@
 
 #ifndef NETWORK_STAR_H
 #define NETWORK_STAR_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "TickBasedCircularQueue.h"
 #include "ActionQueues.h"
@@ -88,5 +90,5 @@ extern int32 spoke_get_smallest_unconfirmed_tick();
 extern XML_ElementParser* Spoke_GetParser();
 extern void DefaultSpokePreferences();
 extern void WriteSpokePreferences(FILE* F);
-
+#endif //disable_networking
 #endif // NETWORK_STAR_H

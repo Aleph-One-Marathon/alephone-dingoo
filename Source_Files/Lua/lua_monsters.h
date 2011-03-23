@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 #ifndef __LUA_MONSTERS_H
 #define __LUA_MONSTERS_H
 
@@ -51,4 +53,5 @@ int Lua_Monsters_register(lua_State *L);
 
 #endif
 
+#endif
 #endif

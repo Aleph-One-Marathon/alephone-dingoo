@@ -28,6 +28,8 @@
 
 #include "Rasterizer.h"
 
+#include "config.h"
+#ifdef HAVE_OPENGL // gp2x/dingoo hack
 
 class Rasterizer_OGL_Class: public RasterizerClass
 {
@@ -66,4 +68,5 @@ public:
 };
 
 
+#endif // HAVE_OPENGL
 #endif

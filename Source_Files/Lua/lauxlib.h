@@ -3,6 +3,8 @@
 ** Auxiliary functions for building Lua libraries
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #ifndef lauxlib_h
@@ -172,3 +174,4 @@ LUALIB_API void (luaL_pushresult) (luaL_Buffer *B);
 #endif
 
 
+#endif

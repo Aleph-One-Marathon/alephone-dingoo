@@ -12,6 +12,8 @@
  */
 
 // Items
+#include "config.h"
+#ifdef HAVE_LUA
 
 {"_item_knife", 0x0},
 {"_item_fist", 0x0},
@@ -712,3 +714,4 @@
 {"_weapon_missile_launcher", _weapon_missile_launcher},
 {"_weapon_alien_shotgun", _weapon_alien_shotgun},
 {"_weapon_ball", _weapon_ball}
+#endif

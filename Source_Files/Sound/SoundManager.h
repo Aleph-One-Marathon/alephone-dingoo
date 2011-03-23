@@ -201,8 +201,13 @@ private:
 	static const int MAXIMUM_OUTPUT_SOUND_VOLUME = 2 * MAXIMUM_SOUND_VOLUME;
 	static const int SOUND_VOLUME_DELTA = MAXIMUM_OUTPUT_SOUND_VOLUME / NUMBER_OF_SOUND_VOLUME_LEVELS;
 	static const int MAXIMUM_AMBIENT_SOUND_VOLUME = 3 * MAXIMUM_SOUND_VOLUME / 2;
+#ifdef HAVE_DINGOO // There's no volume control on the Dingoo. Standard A1 sound levels are very low on the device, yet max (8) for sound (not music) causes clipping. -- Nigel
+	static const int DEFAULT_SOUND_LEVEL= 4;
+	static const int DEFAULT_MUSIC_LEVEL = 6;
+#else
 	static const int DEFAULT_SOUND_LEVEL= NUMBER_OF_SOUND_VOLUME_LEVELS/3;
 	static const int DEFAULT_MUSIC_LEVEL = NUMBER_OF_SOUND_VOLUME_LEVELS/2;
+#endif
 	static const int DEFAULT_VOLUME_WHILE_SPEAKING = MAXIMUM_SOUND_VOLUME / 8;
 
 	// pitch

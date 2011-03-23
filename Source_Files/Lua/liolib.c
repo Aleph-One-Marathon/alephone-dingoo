@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Standard I/O (and system) library
@@ -530,3 +532,4 @@ LUALIB_API int luaopen_io (lua_State *L) {
   return 1;
 }
 
+#endif

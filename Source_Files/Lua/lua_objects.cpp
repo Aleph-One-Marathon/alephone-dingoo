@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_OBJECTS.CPP
 
@@ -573,4 +575,5 @@ static void compatibility(lua_State *L)
 	lua_pcall(L, 0, 0, 0);
 }
 
+#endif
 #endif

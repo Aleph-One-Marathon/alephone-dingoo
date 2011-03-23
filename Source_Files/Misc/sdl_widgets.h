@@ -838,6 +838,8 @@ private:
 
 extern void set_drawing_clip_rectangle(short top, short left, short bottom, short right);
 
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
+
 const string w_items_in_room_get_name_of_item (GameListMessage::GameListEntry item);
 const string w_items_in_room_get_name_of_item (prospective_joiner_info item);
 const string w_items_in_room_get_name_of_item (MetaserverPlayerInfo item);
@@ -1012,7 +1014,7 @@ private:
 
 	void draw_item(vector<ColoredChatEntry>::const_iterator i, SDL_Surface *s, int16 x, int16 y, uint16 width, bool selected) const;
 };
-
+#endif // dingoo nonet thing
 /*
  *	Wrappers to common widget interface follow
  */
@@ -1038,7 +1040,7 @@ protected:
 private:
 	bool hidden, inactive;
 };
-
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 class ColorfulChatWidgetImpl : public SDLWidgetWidget
 {
 public:
@@ -1051,7 +1053,7 @@ public:
 private:
 	w_colorful_chat *m_chat;
 };
-
+#endif // dingoo nonet thing
 	
 class ToggleWidget : public SDLWidgetWidget, public Bindable<bool>
 {
@@ -1274,6 +1276,7 @@ private:
 	w_file_chooser* m_file_chooser;
 };
 
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 
 class GameListWidget
 {
@@ -1352,7 +1355,7 @@ public:
 private:
 	w_players_in_game2* m_pig;
 };
-
+#endif // dingoo nonet thing
 // There are no colour pickers in sdl; we never try to actually construct one of these guys
 class ColourPickerWidget : public Bindable<RGBColor> {};
 

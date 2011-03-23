@@ -25,6 +25,8 @@
 	This contains code for doing fader stuff.	
 */
 
+#include "config.h"
+#ifdef HAVE_OPENGL // GP2x/Dingoo hack
 
 // Indicates whether OpenGL-rendering faders will be used
 bool OGL_FaderActive();
@@ -54,4 +56,5 @@ OGL_Fader *GetOGL_FaderQueueEntry(int Index);
 // Fader renderer; returns whether or not OpenGL faders were active.
 bool OGL_DoFades(float Left, float Top, float Right, float Bottom);
 
+#endif
 #endif

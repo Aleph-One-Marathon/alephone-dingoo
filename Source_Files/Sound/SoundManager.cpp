@@ -597,10 +597,18 @@ short SoundManager::RandomSoundIndexToSoundIndex(short random_sound_index)
 }
 
 SoundManager::Parameters::Parameters() :
+#ifdef HAVE_DINGOO // For now, Dingux chokes completely on anything sound/mixing related. We DO NOT want 32 channels enabled by default. This, I hope, is a default and not an override, so it should be changeable in the prefs -- Nigel.
+	channel_count(8),
+#else
 	channel_count(MAXIMUM_SOUND_CHANNELS),
+#endif
 	volume(DEFAULT_SOUND_LEVEL),
 	flags(_more_sounds_flag | _stereo_flag | _dynamic_tracking_flag | _ambient_sound_flag | _16bit_sound_flag),
+#ifdef HAVE_DINGOO // Speeds up the dingoo quite a bit. Do not change DEFAULT_RATE, that one is also used for sound/pause duration for some reason -- Nigel.
+	rate(22050),
+#else
 	rate(DEFAULT_RATE),
+#endif
 	samples(DEFAULT_SAMPLES),
 	music(DEFAULT_MUSIC_LEVEL),
 	volume_while_speaking(DEFAULT_VOLUME_WHILE_SPEAKING),

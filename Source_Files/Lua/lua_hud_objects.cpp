@@ -19,6 +19,8 @@ LUA_HUD_OBJECTS.CPP
 
     Implements Lua HUD objects and globals
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 #include "lua_hud_objects.h"
 #include "lua_objects.h"
@@ -387,9 +389,12 @@ int Lua_Images_New(lua_State *L)
         int resource_id = lua_tointeger(L, -1);
 
         // blitter from image
-        // Image_Blitter *blitter = (get_screen_mode()->acceleration == _opengl_acceleration) ? NULL : new Image_Blitter();
-		Image_Blitter *blitter = new Image_Blitter(); // GP2x/Dingoo hack		
-		if (!blitter->Load(resource_id))
+#ifdef HAVE_OPENGL
+        Image_Blitter *blitter = (get_screen_mode()->acceleration == _opengl_acceleration) ? new OGL_Blitter() : new Image_Blitter();
+#else
+        Image_Blitter *blitter = new Image_Blitter();
+#endif
+        if (!blitter->Load(resource_id))
         {
             lua_pushnil(L);
             delete blitter;
@@ -448,8 +453,12 @@ int Lua_Images_New(lua_State *L)
 		image.LoadFromFile(File, ImageLoader_Opacity, 0);
 	
 	// blitter from image
-    // Image_Blitter *blitter = (get_screen_mode()->acceleration == _opengl_acceleration) ? NULL : new Image_Blitter();
-	Image_Blitter *blitter = new Image_Blitter(); // GP2x/Dingoo hack
+#ifdef HAVE_OPENGL
+    Image_Blitter *blitter = (get_screen_mode()->acceleration == _opengl_acceleration) ? new OGL_Blitter() : new Image_Blitter();
+#else
+    Image_Blitter *blitter = new Image_Blitter();
+#endif
+
 	if (!blitter->Load(image))
 	{
 		lua_pushnil(L);
@@ -853,8 +862,10 @@ int Lua_Fonts_New(lua_State *L)
 	
 	FontSpecifier *ff = new FontSpecifier(f);
 	ff->Init();
-	/*if (alephone::Screen::instance()->openGL())
-		ff->OGL_Reset(true); */ // GP2x/Dingoo hack
+#ifdef HAVE_OPENGL
+	if (alephone::Screen::instance()->openGL())
+		ff->OGL_Reset(true);
+#endif
 	if (ff->LineSpacing <= 0)
 	{
 		lua_pushnil(L);
@@ -2396,4 +2407,5 @@ int Lua_HUDObjects_register(lua_State *L)
 	return 0;
 }
 
+#endif
 #endif

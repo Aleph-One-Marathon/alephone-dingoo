@@ -21,7 +21,11 @@
 
  */
 
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
+
 #include "cseries.h"
+
 #ifdef HAVE_ALSA
 #include <alsa/asoundlib.h>
 
@@ -209,3 +213,4 @@ network_microphone_idle_proc() {
 #else
 #include "network_microphone_sdl_dummy.cpp"
 #endif
+#endif //disable_networking

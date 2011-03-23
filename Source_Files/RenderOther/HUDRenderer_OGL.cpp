@@ -24,10 +24,10 @@
  *
  *  Written in 2001 by Christian Bauer
  */
+#include "config.h"
+#ifdef HAVE_OPENGL
 
 #include "HUDRenderer_OGL.h"
-
-#ifdef HAVE_OPENGL
 
 #include "FontHandler.h"
 

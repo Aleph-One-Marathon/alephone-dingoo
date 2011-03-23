@@ -32,7 +32,7 @@
 #include <vector>
 #include <algorithm>
 	
-	
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 void ChatHistory::append(const ColoredChatEntry& e)
 {
 	m_history.push_back(e);
@@ -76,5 +76,5 @@ void ColorfulChatWidget::contentAdded(const ColoredChatEntry& e)
 {
 	m_componentWidget->Append(e);
 }
-
+#endif
 

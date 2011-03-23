@@ -107,7 +107,7 @@ Feb 13, 2003 (Woody Zenfell):
     and the relevant code uses per-player settings, this won't be necessary.
     Try a mass-search for "player_behavior" to find the areas affected.
 */
-
+#include "config.h" // eclipse... -- Nigel
 #include "cseries.h" // sorry ryan, nov. 4
 #include <string.h>
 #include <stdlib.h>
@@ -844,10 +844,10 @@ bool load_and_start_game(FileSpecifier& File)
 	{
 		interface_fade_out(MAIN_MENU_BASE, true);
 	}
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	LoadHUDLua();
 	RunLuaHUDScript();
-
+#endif
 	success= load_game_from_file(File);
 
 	if (!success)
@@ -1727,10 +1727,11 @@ static void draw_button(
 	screen_rectangle *screen_rect= get_interface_rectangle(index);
 	short pict_resource_number= MAIN_MENU_BASE + pressed;
 
-	// 320x240 Dingoo hack: Main menu: This is only graphical - pressed and unpressed areas (buttons, logo).
-	//set_drawing_clip_rectangle(screen_rect->top, screen_rect->left, screen_rect->bottom, screen_rect->right);
+#ifdef HAVE_DINGOO	// 320x240 Main menu: This is only graphical - pressed and unpressed areas (buttons, logo).
 	set_drawing_clip_rectangle(screen_rect->top>>1, screen_rect->left>>1, screen_rect->bottom>>1, screen_rect->right>>1);
-	
+#else
+	set_drawing_clip_rectangle(screen_rect->top, screen_rect->left, screen_rect->bottom, screen_rect->right);
+#endif
 	/* Use this to avoid the fade.. */
 	draw_full_screen_pict_resource_from_images(pict_resource_number);
 
@@ -1926,10 +1927,10 @@ static bool begin_game(
 			show_movie(entry.level_number);
 			try_and_display_chapter_screen(CHAPTER_SCREEN_BASE + entry.level_number, false, false);
 		}
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 		LoadHUDLua();
 		RunLuaHUDScript();
-		
+#endif
 		/* Begin the game! */
 		success= new_game(number_of_players, is_networked, &game_information, starts, &entry);
 		if(success)
@@ -1960,9 +1961,10 @@ static void start_game(
 	reset_screen();
 	
 	enter_screen();
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	if (!changing_level)
 		L_Call_HUDInit();
-	
+#endif
 	// LP: this is in case we are starting underneath a liquid
 	if (!OGL_IsActive() || !(TEST_FLAG(Get_OGL_ConfigureData().Flags,OGL_Flag_Fader)))
 	{
@@ -2037,7 +2039,9 @@ static void finish_game(
 
 	stop_fade();
 	set_fade_effect(NONE);
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	L_Call_HUDCleanup();
+#endif
 	exit_screen();
 
 	/* Stop the replay */
@@ -2068,8 +2072,9 @@ static void finish_game(
 	show_cursor();
 
 	leaving_map();
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	CloseLuaHUDScript();
-	
+#endif
 	// LP: stop playing the background music if it was present
 	Music::instance()->StopLevelMusic();
 	
@@ -2102,7 +2107,9 @@ static void finish_game(
 		game_state.state = _displaying_network_game_dialogs;
 
 		force_system_colors();
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 		display_net_game_stats();
+#endif
 	}
 	
 	if(return_to_main_menu) display_main_menu();
@@ -2374,21 +2381,22 @@ static void handle_interface_menu_screen_click(
 
 // More resolution stuff. This time, main menu clickable areas -- Nigel
 #ifdef SDL
-//	xoffset = (SDL_GetVideoSurface()->w - 640) / 2;
-//	yoffset = (SDL_GetVideoSurface()->h - 480) / 2;
+#ifndef HAVE_DINGOO // Forgot why I excluded these (forget one comment and it'll bite you!)
+	xoffset = (SDL_GetVideoSurface()->w - 640) / 2;
+	yoffset = (SDL_GetVideoSurface()->h - 480) / 2;
+#endif
 #endif
 
 	/* find it.. */
 	for(index= _new_game_button_rect; index<NUMBER_OF_INTERFACE_RECTANGLES; ++index)
 	{
 		screen_rect= get_interface_rectangle(index);
-		// BEGIN 320x240 Dingoo hack: get_interface_rect stuff is used elsewhere (HUD),
-		// have to resort to these. These are the mouse clickable main menu areas -- Nigel
+#ifdef HAVE_DINGOO // BEGIN 320x240 Dingoo hack: get_interface_rect stuff is used elsewhere (HUD), so I have to do it here. These are the mouse clickable main menu areas -- Nigel
 		screen_rect->top = screen_rect->top>>1;
 		screen_rect->left = screen_rect->left>>1;
 		screen_rect->bottom = screen_rect->bottom>>1;
 		screen_rect->right = screen_rect->right>>1;
-		// END hack
+#endif
 		if (point_in_rectangle(x - xoffset, y - yoffset, screen_rect))
 			break;
 	}
@@ -2403,13 +2411,12 @@ static void handle_interface_menu_screen_click(
 			stop_interface_fade();
 
 			screen_rect= get_interface_rectangle(index);
-			// BEGIN 320x240 Dingoo hack: get_interface_rect stuff is used elsewhere (HUD),
-			// have to resort to these. These are the mouse clickable main menu areas -- Nigel
+#ifdef HAVE_DINGOO // BEGIN 320x240 Dingoo hack: get_interface_rect stuff is used elsewhere (HUD), so I have to do it here. These are the mouse clickable main menu areas -- Nigel
 			screen_rect->top = screen_rect->top>>1;
 			screen_rect->left = screen_rect->left>>1;
 			screen_rect->bottom = screen_rect->bottom>>1;
 			screen_rect->right = screen_rect->right>>1;
-			// END hack
+#endif
 
 			/* Draw it initially depressed.. */
 			draw_button(index, last_state);
@@ -2826,8 +2833,12 @@ size_t should_restore_game_networked()
 
 	horizontal_placer *resume_as_placer = new horizontal_placer;
         w_toggle* theRestoreAsNetgameToggle = new w_toggle(dynamic_world->player_count > 1, 0);
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
         theRestoreAsNetgameToggle->set_labels_stringset(kSingleOrNetworkStringSetID);
-	resume_as_placer->dual_add(theRestoreAsNetgameToggle->label("Resume as"), d);
+#else
+        theRestoreAsNetgameToggle->set_labels_stringset(149); // very dirty, but should do the job
+#endif
+    resume_as_placer->dual_add(theRestoreAsNetgameToggle->label("Resume as"), d);
 	resume_as_placer->dual_add(theRestoreAsNetgameToggle, d);
 
 	placer->add(resume_as_placer, true);

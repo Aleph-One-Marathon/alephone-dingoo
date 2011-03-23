@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Global State
@@ -166,3 +168,4 @@ LUAI_FUNC void luaE_freethread (lua_State *L, lua_State *L1);
 
 #endif
 
+#endif

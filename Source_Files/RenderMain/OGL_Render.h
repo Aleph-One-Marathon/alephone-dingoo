@@ -43,6 +43,8 @@ July 8, 2000:
 // Test for activity
 bool OGL_IsActive();
 
+#include "config.h"
+#ifdef HAVE_OPENGL // GP2x/Dingoo hack
 
 // It will be black; whether OpenGL is active will be returned
 bool OGL_ClearScreen();
@@ -108,4 +110,5 @@ bool OGL_Get2D();
 bool OGL_Copy2D(GWorldPtr BufferPtr, Rect& SourceBounds, Rect& DestBounds, bool UseBackBuffer, bool FrameEnd);
 #endif
 
+#endif
 #endif

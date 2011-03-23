@@ -29,6 +29,7 @@
  *  May 18, 2003 (Woody Zenfell): now uses passed-in port number for local socket.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #ifdef __MWERKS__

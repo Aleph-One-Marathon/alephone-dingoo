@@ -27,6 +27,8 @@
 
 #ifndef __SDL__NETWORK_H
 #define __SDL__NETWORK_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include <SDL_net.h>
 
@@ -121,5 +123,5 @@ OSErr NetDDPSendFrame(DDPFramePtr frame, NetAddrBlock *address, short protocolTy
 /* ---------- prototypes/NETWORK_ADSP.C */
 
 // jkvw: removed - we use TCPMess now
-
+#endif //disable_networking
 #endif

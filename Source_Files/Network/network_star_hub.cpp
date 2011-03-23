@@ -42,6 +42,7 @@
  *	Hub can then associate the ID in the identification packet with the paket's source address.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "network_star.h"

@@ -33,6 +33,8 @@
 
 #ifndef NETWORK_MICROPHONE_SHARED_H
 #define NETWORK_MICROPHONE_SHARED_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 // Netmic code should call this once the format is known (and any time the capture format changes).
 // copy_and_send_() uses the values specified by the most recent call to this routine.
@@ -53,5 +55,5 @@ int32 copy_and_send_audio_data(uint8* inFirstChunkReadPosition, int32 inFirstChu
 // Value is only valid for the most recently-specified capture format (with announce_...())
 // Calling this without specifying a capture format is an error.
 int32 get_capture_byte_count_per_packet();
-
+#endif //disable_networking
 #endif // NETWORK_MICROPHONE_SHARED_H

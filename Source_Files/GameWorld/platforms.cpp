@@ -721,9 +721,11 @@ bool set_platform_state(
 				
 				/* assume the correct state, and correctly update all switches referencing this platform */
 				SET_PLATFORM_IS_ACTIVE(platform, state);
+#ifdef HAVE_LUA // gp2x/dingoo hack
                                 //MH: Lua script hook
                                 L_Call_Platform_Activated(platform->polygon_index);
-				assume_correct_switch_position(_panel_is_platform_switch, platform->polygon_index, state);
+#endif
+                assume_correct_switch_position(_panel_is_platform_switch, platform->polygon_index, state);
 				
 				new_state= state;
 			}

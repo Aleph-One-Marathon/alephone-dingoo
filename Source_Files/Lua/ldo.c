@@ -3,6 +3,8 @@
 ** Stack and Call structure of Lua
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #include <setjmp.h>
@@ -514,3 +516,4 @@ int luaD_protectedparser (lua_State *L, ZIO *z, const char *name) {
 }
 
 
+#endif

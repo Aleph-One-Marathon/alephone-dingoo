@@ -28,6 +28,7 @@
  *
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #ifdef __MWERKS__

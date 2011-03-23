@@ -27,6 +27,7 @@
     9 Mar 2002 (Woody Zenfell):  Made some packing/unpacking functions pack/unpack more data
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "network_data_formats.h"

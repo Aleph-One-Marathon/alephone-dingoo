@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 #ifndef __LUA_SERIALIZE_H
 #define __LUA_SERIALIZE_H
 
@@ -43,4 +45,5 @@ bool lua_restore(lua_State *L, std::streambuf* sb);
 
 #endif
 
+#endif
 #endif

@@ -2,11 +2,27 @@ INSTALL
 
 Make sure boost is installed in the dingux toolchain.
 http://code.google.com/p/zxtune/wiki/HowToBuild
+After that, change mipsel-linux-uclibc/include/boost/integer_traits.hpp like so:
+
+(...)
+#else
+	public detail::integer_traits_base<wchar_t, 0, 0xffff>
+//#error No WCHAR_MIN and WCHAR_MAX present, please adjust integer_traits<> for your compiler.
+(...)
+
+Otherwise you'll get that "No WCHAR_MIN/MAX present" error on AlephOne compile.
+Might not be necessary in future versions of the Dingux toolchain.
 
 Linux users can probably find bjam in their repo, cygwin users can build bjam
 from source (native, doesn't need to go in toolchain!).
+Just copying the header files might or might not work.
 
-After that's been taken care of:
-sh dingoo-configure.sh && make
 
-You'll find the 'alephone' binary in the Source_Files dir if everything went OK.
+After boost has been taken care of:
+cd dingux-build
+sh dingux-configure.sh && make
+
+You'll find the 'alephone' binary in the dingux-build/Source_Files dir if everything went OK.
+
+Once you're ready to release, build a profiling build (edit dingoo-configure.sh), collect the .gcno files
+after running the profiling binary and then build a profiled build. This yields another 15% speed increase.

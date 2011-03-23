@@ -18,6 +18,8 @@
 	http://www.gnu.org/licenses/gpl.html
 
 */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "network_capabilities.h"
 
@@ -30,5 +32,5 @@ const string Capabilities::kGatherable = "Gatherable";
 const string Capabilities::kZippedData = "ZippedData";
 const string Capabilities::kNetworkStats = "NetworkStats";
 
-
+#endif //disable_networking
 

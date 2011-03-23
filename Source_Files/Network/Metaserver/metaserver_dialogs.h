@@ -24,6 +24,8 @@
 
 #ifndef METASERVER_DIALOGS_H
 #define METASERVER_DIALOGS_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "network_metaserver.h"
 #include "metaserver_messages.h"
@@ -111,5 +113,5 @@ protected:
 	Uint32 m_lastGameSelected;
 	bool m_stay_selected; // doesn't deselect after PM
 };
-
+#endif // disablenetworking
 #endif // METASERVER_DIALOGS_H

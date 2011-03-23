@@ -25,6 +25,7 @@
  *  Mar 1, 2002 (Woody Zenfell): Added new w_entry_point_selector widget.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include	"network_dialog_widgets_sdl.h"

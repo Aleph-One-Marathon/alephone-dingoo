@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** See Copyright Notice in lua.h
@@ -100,3 +102,4 @@ const lu_byte luaP_opmodes[NUM_OPCODES] = {
  ,opmode(0, 1, OpArgU, OpArgN, iABC)		/* OP_VARARG */
 };
 
+#endif

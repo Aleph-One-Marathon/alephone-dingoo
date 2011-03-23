@@ -24,6 +24,8 @@
 
 #ifndef METASERVER_MESSAGES_H
 #define METASERVER_MESSAGES_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "Message.h"
 
@@ -848,5 +850,5 @@ protected:
 private:
 	int32	m_gameTimeInSeconds;
 };
-
+#endif //disable_networking
 #endif // METASERVER_MESSAGES_H

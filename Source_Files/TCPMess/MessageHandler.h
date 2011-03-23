@@ -27,6 +27,8 @@
 
 #ifndef MESSAGEHANDLER_H
 #define MESSAGEHANDLER_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 //#include <unistd.h>
 #include <cstdlib>
@@ -111,5 +113,5 @@ newMessageHandlerMethod(
 typedef TypedMessageHandlerFunction<Message> MessageHandlerFunction;
 
 
-
+#endif // disablenetworking
 #endif // MESSAGEHANDLER_H

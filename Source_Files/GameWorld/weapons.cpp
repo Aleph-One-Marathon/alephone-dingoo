@@ -3467,15 +3467,18 @@ static void update_player_ammo_count(
 		mark_ammo_display_as_dirty();
 	}
 }
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 extern bool LuaPlayerCanWieldWeapons(short);
-
+#endif
 /*static*/ bool player_has_valid_weapon(
 	short player_index)
 {
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	// LP change:
 	if (CannotWieldWeapons() || !LuaPlayerCanWieldWeapons(player_index)) return false;
-
+#else
+	if (CannotWieldWeapons()) return false;
+#endif
 	struct player_weapon_data *player_weapons= get_player_weapon_data(player_index);
 
 	return (player_weapons->current_weapon!=NONE);

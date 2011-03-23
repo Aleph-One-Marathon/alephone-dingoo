@@ -96,6 +96,7 @@ September 17, 2004 (jkvw):
 	Also moved to TCPMess for TCP communications.
 */
 
+#include "config.h"
 #if defined(DISABLE_NETWORKING)
 
 #include "network_dummy.cpp"
@@ -256,7 +257,9 @@ struct ignore_player {
 struct ignore_lua
 {
 	void operator()(const std::string&) const {
+#ifdef HAVE_LUA // gp2x/dingoo hack
 		ToggleLuaMute();
+#endif
 	}
 };
 
@@ -1215,8 +1218,9 @@ bool NetEnter(void)
 
 	clear_player_mic_mutes();
 	IgnoreParser.register_command("mic", ignore_mic());
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	ResetLuaMute();
+#endif
 	IgnoreParser.register_command("lua", ignore_lua());
 
 	Console::instance()->register_command("ignore", IgnoreParser);

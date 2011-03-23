@@ -37,6 +37,8 @@ Feb 27, 2002 (Br'fin (Jeremy Parsons)):
 
 #ifndef	NETWORK_PRIVATE_H
 #define	NETWORK_PRIVATE_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include	"cstypes.h"
 
@@ -333,5 +335,5 @@ private:
 	bool mShouldSeek;
 };
 
-
+#endif //disable_networking
 #endif//NETWORK_PRIVATE_H

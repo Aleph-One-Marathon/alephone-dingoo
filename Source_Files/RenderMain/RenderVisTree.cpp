@@ -33,6 +33,7 @@ Oct 13, 2000
 	LP: replaced GrowableLists and ResizableLists with STL vectors
 */
 
+#include "config.h" // Dingoo: CSeries should already include this, but Eclipse doesn't show it without this :( -- Nigel
 #include "cseries.h"
 
 #include "map.h"
@@ -382,7 +383,9 @@ void RenderVisTreeClass::initialize_polygon_queue()
 	polygon_queue_size= 0;
 }
 
-
+// This piece of code eats up quite some resources. Attempting to revert parts to the old (1995) way for the Dingoo build. Better distance handling isn't necessary on the 320x240 screen :P -- Nigel
+// Result: 24 to 29 fps increase (+/-20%) in non-complex areas.
+#ifndef HAVE_DINGOO
 // LP change: make it better able to do long-distance views
 uint16 RenderVisTreeClass::next_polygon_along_line(
 	short *polygon_index,
@@ -546,6 +549,172 @@ uint16 RenderVisTreeClass::next_polygon_along_line(
 	
 	return clip_flags;
 }
+#else
+uint16 RenderVisTreeClass::next_polygon_along_line(
+	short *polygon_index,
+	world_point2d *origin, /* not necessairly in polygon_index */
+	long_vector2d *_vector, // world_vector2d *vector,
+	short *clipping_endpoint_index, /* if non-NONE on entry this is the solid endpoint we’re shooting for */
+	short *clipping_line_index, /* NONE on exit if this polygon transition wasn’t accross an elevation line */
+	short bias)
+{
+	polygon_data *polygon= get_polygon_data(*polygon_index);
+	short next_polygon_index, crossed_line_index, crossed_side_index;
+	bool passed_through_solid_vertex= false;
+	short vertex_index, vertex_delta;
+	uint16 clip_flags= 0;
+	short state;
+
+	ADD_POLYGON_TO_AUTOMAP(*polygon_index);
+	PUSH_POLYGON_INDEX(*polygon_index);
+
+	state= _looking_for_first_nonzero_vertex;
+	vertex_index= 0, vertex_delta= 1; /* start searching clockwise from vertex zero */
+	// LP change: added test for looping around:
+	// will remember the first vertex examined when the state has changed
+/*	short initial_vertex_index = vertex_index;
+	bool changed_state = true;
+	do
+	{
+		// Jump out of loop?
+		if (changed_state)
+			changed_state = false;
+		else if (vertex_index == initial_vertex_index)
+		{
+			// Attempt to idiot-proof it by returning nothing
+			next_polygon_index = NONE;
+			crossed_line_index = NONE;
+			crossed_side_index = NONE;
+			break;
+		} */
+	do {
+		short endpoint_index= polygon->endpoint_indexes[vertex_index];
+		world_point2d *vertex= &get_endpoint_data(endpoint_index)->vertex;
+		// LP change to make it more long-distance-friendly
+//		CROSSPROD_TYPE cross_product= CROSSPROD_TYPE(int32(vertex->x)-int32(origin->x))*_vector->j - CROSSPROD_TYPE(int32(vertex->y)-int32(origin->y))*_vector->i;
+		long cross_product = (vertex->x-origin->x)*_vector->j - (vertex->y-origin->y)*_vector->i; // No double (crossprod_type = double), see if this helps a bit -- Nigel.
+
+//		dprintf("p#%d, e#%d:#%d, SGN(cp)=#%d, state=#%d", *polygon_index, vertex_index, polygon->endpoint_indexes[vertex_index], SGN(cross_product), state);
+		if (cross_product < 0)
+		{
+		    switch (state)
+		    {
+			case _looking_for_first_nonzero_vertex:
+			    /* search counterclockwise for transition (right to left) */
+			    state= _looking_counterclockwise_for_left_vertex;
+			    vertex_delta= -1;
+			    // LP change: resetting loop test
+			    //initial_vertex_index = vertex_index;
+			   // changed_state = true;
+			    break;
+
+			case _looking_clockwise_for_right_vertex: /* found the transition we were looking for */
+			{
+			    short i= WRAP_LOW(vertex_index, polygon->vertex_count-1);
+			    next_polygon_index= polygon->adjacent_polygon_indexes[i];
+			    crossed_line_index= polygon->line_indexes[i];
+			    crossed_side_index= polygon->side_indexes[i];
+			}
+			case _looking_for_next_nonzero_vertex: /* next_polygon_index already set */
+			    state= NONE;
+			    break;
+		    }
+		} else if (cross_product > 0)
+		{
+		    switch (state)
+		    {
+			case _looking_for_first_nonzero_vertex:
+			    /* search clockwise for transition (left to right) */
+			    state= _looking_clockwise_for_right_vertex;
+			    // LP change: resetting loop test
+			   // initial_vertex_index = vertex_index;
+			   // changed_state = true;
+			    break;
+
+			case _looking_counterclockwise_for_left_vertex: /* found the transition we were looking for */
+			    next_polygon_index= polygon->adjacent_polygon_indexes[vertex_index];
+			    crossed_line_index= polygon->line_indexes[vertex_index];
+			    crossed_side_index= polygon->side_indexes[vertex_index];
+			case _looking_for_next_nonzero_vertex: /* next_polygon_index already set */
+			    state= NONE;
+			    break;
+		    }
+		} else
+		{
+		    if (state!=_looking_for_first_nonzero_vertex)
+		    {
+			if (endpoint_index==*clipping_endpoint_index) passed_through_solid_vertex= true;
+
+			/* if we think we know what’s on the other side of this zero (these zeros)
+			change the state: if we don’t find what we’re looking for then the polygon
+			is entirely on one side of the line or the other (except for this vertex),
+			in any case we need to call decide_where_vertex_leads() to find out what’s
+			on the other side of this vertex */
+			switch (state)
+			{
+			    case _looking_clockwise_for_right_vertex:
+			    case _looking_counterclockwise_for_left_vertex:
+				next_polygon_index= *polygon_index;
+				clip_flags|= decide_where_vertex_leads(&next_polygon_index, &crossed_line_index, &crossed_side_index,
+					   vertex_index, origin, _vector, clip_flags, bias);
+				state= _looking_for_next_nonzero_vertex;
+				// LP change: resetting loop test
+				//initial_vertex_index = vertex_index;
+				//changed_state = true;
+				break;
+			}
+		    }
+		}
+		/* adjust vertex_index (clockwise or counterclockwise, depending on vertex_delta) */
+		vertex_index= (vertex_delta<0) ? WRAP_LOW(vertex_index, polygon->vertex_count-1) :
+			WRAP_HIGH(vertex_index, polygon->vertex_count-1);
+	}
+	while (state!=NONE);
+
+//	dprintf("exiting, cli=#%d, npi=#%d", crossed_line_index, next_polygon_index);
+
+	/* if we didn’t pass through the solid vertex we were aiming for, set clipping_endpoint_index to NONE,
+		we assume the line we passed through doesn’t clip, and set clipping_line_index to NONE
+		(this will be corrected in a few moments if we chose poorly) */
+	if (!passed_through_solid_vertex) *clipping_endpoint_index= NONE;
+	*clipping_line_index= NONE;
+
+	if (crossed_line_index!=NONE)
+	{
+		line_data *line= get_line_data(crossed_line_index);
+
+		/* add the line we crossed to the automap */
+		ADD_LINE_TO_AUTOMAP(crossed_line_index);
+
+		/* if the line has a side facing this polygon, mark the side as visible */
+		if (crossed_side_index!=NONE) SET_RENDER_FLAG(crossed_side_index, _side_is_visible);
+
+		/* if this line is transparent we need to check for a change in elevation for clipping,
+			if it’s not transparent then we can’t pass through it */
+		// LP change: added test for there being a polygon on the other side
+//		if (LINE_IS_TRANSPARENT(line) && next_polygon_index != NONE)
+		if (LINE_IS_TRANSPARENT(line))
+		{
+			polygon_data *next_polygon= get_polygon_data(next_polygon_index);
+
+			if (line->highest_adjacent_floor>next_polygon->floor_height ||
+				line->highest_adjacent_floor>polygon->floor_height) clip_flags|= _clip_down; /* next polygon floor is lower */
+			if (line->lowest_adjacent_ceiling<next_polygon->ceiling_height ||
+				line->lowest_adjacent_ceiling<polygon->ceiling_height) clip_flags|= _clip_up; /* next polygon ceiling is higher */
+			if (clip_flags&(_clip_up|_clip_down)) *clipping_line_index= crossed_line_index;
+		}
+		else
+		{
+			next_polygon_index= NONE;
+		}
+	}
+
+	/* tell the caller what polygon we ended up in */
+	*polygon_index= next_polygon_index;
+
+	return clip_flags;
+}
+#endif
 
 // LP change: make it better able to do long-distance views
 uint16 RenderVisTreeClass::decide_where_vertex_leads(

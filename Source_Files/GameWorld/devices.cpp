@@ -779,18 +779,21 @@ static void	change_panel_state(
 			state= get_recharge_status(panel_side_index);
 			SET_CONTROL_PANEL_STATUS(side, state);
 			if (!state) set_control_panel_texture(side);
-                                // Lua script hook
-                                if (player -> control_panel_side_index == panel_side_index)
-                                    L_Call_Start_Refuel (definition->_class, player_index, panel_side_index);
-                                else
-                                    L_Call_End_Refuel (definition->_class, player_index, panel_side_index);
+#ifdef HAVE_LUA // GP2x/Dingoo hack
+			// Lua script hook
+                if (player -> control_panel_side_index == panel_side_index)
+                	L_Call_Start_Refuel (definition->_class, player_index, panel_side_index);
+                else
+                	L_Call_End_Refuel (definition->_class, player_index, panel_side_index);
+#endif
 			break;
 		case _panel_is_computer_terminal:
 			if (get_game_state()==_game_in_progress && !PLAYER_HAS_CHEATED(player) && !PLAYER_HAS_MAP_OPEN(player))
 			{
-                                //MH: Lua script hook
-                                L_Call_Terminal_Enter(side->control_panel_permutation,player_index);
-				
+#ifdef HAVE_LUA // GP2x/Dingoo hack
+				//MH: Lua script hook
+				L_Call_Terminal_Enter(side->control_panel_permutation,player_index);
+#endif
 				/* this will handle changing levels, if necessary (i.e., if weÕre finished) */
 				enter_computer_interface(player_index, side->control_panel_permutation, calculate_level_completion_state());
 			}
@@ -808,26 +811,27 @@ static void	change_panel_state(
 					SET_CONTROL_PANEL_STATUS(side, state);
 					set_control_panel_texture(side);
 				}
-                                //MH: Lua script hook
-                                L_Call_Tag_Switch(side->control_panel_permutation,player_index);
-			
+#ifdef HAVE_LUA // GP2x/Dingoo hack
+				//MH: Lua script hook
+                L_Call_Tag_Switch(side->control_panel_permutation,player_index);
+#endif
 			}
 			break;
 		case _panel_is_light_switch:
 			state= !state;
 			make_sound= set_light_status(side->control_panel_permutation, state);
-			
+#ifdef HAVE_LUA // GP2x/Dingoo hack
                         //MH: Lua script hook
                         L_Call_Light_Switch(side->control_panel_permutation,player_index);
-
+#endif
 			break;
 		case _panel_is_platform_switch:
 			state= !state;
 			make_sound= try_and_change_platform_state(get_polygon_data(side->control_panel_permutation)->permutation, state);
-			
+#ifdef HAVE_LUA // GP2x/Dingoo hack
                         //MH: Lua script hook
                         L_Call_Platform_Switch(side->control_panel_permutation,player_index);
-			
+#endif
 			break;
 		case _panel_is_pattern_buffer:
                         if (player_controlling_game() && !PLAYER_HAS_CHEATED(local_player))
@@ -852,10 +856,10 @@ static void	change_panel_state(
                                         if(dynamic_world->tick_count-player->ticks_at_last_successful_save>MINIMUM_RESAVE_TICKS)
                                         {
                                                 play_control_panel_sound(panel_side_index, _activating_sound);
-                                                
+#ifdef HAVE_LUA // GP2x/Dingoo hack
                                                 //MH: Lua script hook
                                                 L_Call_Pattern_Buffer(/*side->control_panel_permutation*/panel_side_index,player_index);
-                                        
+#endif
                 //				fade_out_background_music(30);
                 
                                                 /* Assume a successful save- prevents vidding of the save game key.. */

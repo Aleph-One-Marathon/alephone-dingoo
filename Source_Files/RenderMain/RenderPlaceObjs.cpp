@@ -324,12 +324,12 @@ render_object_data *RenderPlaceObjsClass::build_render_object(
 				
 				// LP: not sure how to handle nonexistent sprites here
 				assert(render_object->rectangle.texture);
-				
+
+#ifdef HAVE_OPENGL
 				// LP change: for the convenience of the OpenGL renderer
 				render_object->rectangle.Opacity = Opacity;
 				render_object->rectangle.ShapeDesc = BUILD_DESCRIPTOR(data.collection_code,0);
 				render_object->rectangle.LowLevelShape = data.low_level_shape_index;
-#ifdef HAVE_OPENGL
 				render_object->rectangle.ModelPtr = ModelPtr;
 				if (ModelPtr)
 				{

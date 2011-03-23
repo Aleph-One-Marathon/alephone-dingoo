@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** a generic input stream interface
@@ -80,3 +82,4 @@ char *luaZ_openspace (lua_State *L, Mbuffer *buff, size_t n) {
 }
 
 
+#endif

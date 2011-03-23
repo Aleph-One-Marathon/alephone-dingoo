@@ -32,6 +32,8 @@
 
 #ifndef NETWORK_AUDIO_SHARED_H
 #define NETWORK_AUDIO_SHARED_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include    "cseries.h"
 
@@ -60,3 +62,4 @@ const int   kNetworkAudioSampleRate     = 8000;
 const int   kNetworkAudioBytesPerFrame  = (kNetworkAudioIs16Bit ? 2 : 1) * (kNetworkAudioIsStereo ? 2 : 1);
 
 #endif // NETWORK_AUDIO_SHARED_H
+#endif //disable_networking

@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** load precompiled Lua chunks
@@ -33,4 +35,5 @@ LUAI_FUNC void luaU_print (const Proto* f, int full);
 /* size of header of binary files */
 #define LUAC_HEADERSIZE		12
 
+#endif
 #endif

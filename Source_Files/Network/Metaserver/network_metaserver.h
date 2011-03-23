@@ -24,6 +24,8 @@
 
 #ifndef NETWORK_METASERVER_H
 #define NETWORK_METASERVER_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "metaserver_messages.h" // RoomDescription
 
@@ -345,5 +347,5 @@ private:
 	bool                                    m_notifiedOfDisconnected;
 	bool                                    m_gameAnnounced;
 };
-
+#endif // disablenetworking
 #endif // NETWORK_METASERVER_H

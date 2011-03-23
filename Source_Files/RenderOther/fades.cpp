@@ -142,11 +142,11 @@ struct fade_data
 static struct fade_data *fade = NULL;
 
 static uint16 fades_random_seed= 0x1;
-
+#ifdef HAVE_OPENGL // gp2x/dingoo hack
 // LP addition: pointer to OpenGL fader to be used in the color-table functions below
 // It is NULL if OpenGL is inactive
 static OGL_Fader *CurrentOGLFader = NULL;
-
+#endif
 static int FadeEffectDelay = 0;
 
 /* ---------- fade definitions */
@@ -322,12 +322,11 @@ void set_fade_effect(
 		{
 			if (type==NONE)
 			{
+#ifdef HAVE_OPENGL // gp2x/dingoo hack
 				// LP addition: OpenGL-fader handling
 				for (int f=0; f<NUMBER_OF_FADER_QUEUE_ENTRIES; f++)
 					SetOGLFader(f);
-				
 				// Only do the video-card fader if the OpenGL fader is inactive
-#ifdef HAVE_OPENGL
 				if (!OGL_FaderActive())
 #endif
 					animate_screen_clut(world_color_table, false);
@@ -431,6 +430,13 @@ short get_fade_period(
 	return definition->period;
 }
 
+#ifdef HAVE_DINGOO // We don't want the user/game to be able to change default gammma/brightness in preferences, it causes the software SDL_setgammaramp emulation to run all the time decreasing performance -- Nigel
+void gamma_correct_color_table(	struct color_table *uncorrected_color_table, struct color_table *corrected_color_table,	short gamma_level)
+{
+	// Just do nothing but copy the default color table.
+	memcpy(corrected_color_table, uncorrected_color_table, sizeof(struct color_table));
+}
+#else
 void gamma_correct_color_table(
 	struct color_table *uncorrected_color_table,
 	struct color_table *corrected_color_table,
@@ -452,7 +458,7 @@ void gamma_correct_color_table(
 		corrected->blue = static_cast<uint16>(pow(static_cast<float>(uncorrected->blue/65535.0), gamma)*65535.0);
 	}
 }
-
+#endif
 /* ---------- private code */
 
 /*
@@ -727,17 +733,15 @@ static void soft_tint_color_table(
 	}
 }
 
-
+#ifdef HAVE_OPENGL // gp2x/dingoo hack
 // Arg is location in the OpenGL fader queue
 void SetOGLFader(int Index)
 {
-#ifdef HAVE_OPENGL
 	if (OGL_FaderActive())
 	{
 		CurrentOGLFader = GetOGL_FaderQueueEntry(Index);
 		CurrentOGLFader->Type = NONE;
 	} else
-#endif
 		CurrentOGLFader = NULL;
 }
 
@@ -750,7 +754,7 @@ static void TranslateToOGLFader(rgb_color &Color, _fixed Opacity)
 	CurrentOGLFader->Color[2] = Color.blue/float(FIXED_ONE-1);
 	CurrentOGLFader->Color[3] = Opacity/float(FIXED_ONE);
 }
-
+#endif
 
 struct fade_definition *original_fade_definitions = NULL;
 class XML_FaderParser: public XML_ElementParser

@@ -3,6 +3,8 @@
 ** Code generator for Lua
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 #ifndef lcode_h
 #define lcode_h
@@ -73,4 +75,5 @@ LUAI_FUNC void luaK_posfix (FuncState *fs, BinOpr op, expdesc *v1, expdesc *v2);
 LUAI_FUNC void luaK_setlist (FuncState *fs, int base, int nelems, int tostore);
 
 
+#endif
 #endif

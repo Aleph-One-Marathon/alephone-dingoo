@@ -40,6 +40,8 @@
 
 #ifndef SSLP_PROTOCOL_H
 #define	SSLP_PROTOCOL_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include	<SDL_net.h>
 
@@ -156,5 +158,6 @@ const int SIZEOF_SSLP_Packet = 3*4 + 2*2 + SSLP_MAX_TYPE_LENGTH + SSLP_MAX_NAME_
 #endif
 
 // sizeof(struct SSLP_Packet) == 80
+#endif // disablenetworking
 
 #endif//SSLP_PROTOCOL_H

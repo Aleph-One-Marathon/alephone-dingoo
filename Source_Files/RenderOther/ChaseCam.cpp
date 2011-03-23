@@ -55,13 +55,17 @@ bool ChaseCam_CanExist()
 // All these functions return the chase cam's state (true: active; false: inactive)
 bool ChaseCam_IsActive()
 {
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
   if (!NetAllowBehindview()) return false;
+#endif
   if (!ChaseCam_CanExist()) return false;
   return _ChaseCam_IsActive;
 }
 bool ChaseCam_SetActive(bool NewState)
 {
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
   if (!NetAllowBehindview()) return false;
+#endif
   if (!ChaseCam_CanExist()) return false;
   return (_ChaseCam_IsActive = (NewState != 0));
 }

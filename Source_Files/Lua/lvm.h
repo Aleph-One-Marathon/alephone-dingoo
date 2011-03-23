@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Lua virtual machine
@@ -32,4 +34,5 @@ LUAI_FUNC void luaV_settable (lua_State *L, const TValue *t, TValue *key,
 LUAI_FUNC void luaV_execute (lua_State *L, int nexeccalls);
 LUAI_FUNC void luaV_concat (lua_State *L, int total, int last);
 
+#endif
 #endif

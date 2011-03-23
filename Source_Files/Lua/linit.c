@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Initialization of libraries for lua.c
@@ -36,3 +38,4 @@ LUALIB_API void luaL_openlibs (lua_State *L) {
   }
 }
 
+#endif

@@ -276,8 +276,9 @@ void reset_motion_sensor(
 	bitmap_window_copy(virgin_mount, mount, 0, 0, mount->width, mount->height);
 
 	for (i= 0; i<MAXIMUM_MOTION_SENSOR_ENTITIES; ++i) MARK_SLOT_AS_FREE(entities+i);
-	
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 	network_compass_state= _network_compass_all_off;
+#endif
 }
 
 /* every ten ticks, regardless of frame rate, this will update the positions of the objects we
@@ -329,6 +330,7 @@ void HUD_SW_Class::render_motion_sensor(short ticks_elapsed)
 	}
 }
 
+#ifdef HAVE_OPENGL // gp2x/dingoo hack
 void HUD_OGL_Class::render_motion_sensor(short ticks_elapsed)
 {
 	// Draw background
@@ -345,7 +347,8 @@ void HUD_OGL_Class::render_motion_sensor(short ticks_elapsed)
 		draw_network_compass();
 	draw_all_entity_blips();
 }
-
+#endif
+#ifdef HAVE_LUA // gp2x/dingoo hack
 void HUD_Lua_Class::render_motion_sensor(short ticks_elapsed)
 {
 	// If we need to update the motion sensor, draw all active entities
@@ -357,8 +360,7 @@ void HUD_Lua_Class::render_motion_sensor(short ticks_elapsed)
 		motion_sensor_changed = true;
 	}
 }
-
-
+#endif
 /* the interface code will call this function and only draw the motion sensor if we return true */
 bool motion_sensor_has_changed(void)
 {
@@ -494,7 +496,7 @@ void HUD_Class::draw_all_entity_blips(void)
 		}
 	}
 }
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
 void HUD_Lua_Class::draw_all_entity_blips(void)
 {
 	struct entity_data *entity;
@@ -522,7 +524,7 @@ void HUD_Lua_Class::draw_all_entity_blips(void)
 		}
 	}
 }
-
+#endif
 void HUD_SW_Class::draw_or_erase_unclipped_shape(short x, short y, shape_descriptor shape, bool draw)
 {
 	struct bitmap_definition *mount, *virgin_mount, *blip;
@@ -538,7 +540,7 @@ void HUD_SW_Class::draw_or_erase_unclipped_shape(short x, short y, shape_descrip
 		unclipped_solid_sprite_copy(blip, mount, x, y) :
 		bitmap_window_copy(virgin_mount, mount, x, y, x+blip->width, y+blip->height);
 }
-
+#ifdef HAVE_OPENGL // gp2x/dingoo hack
 void HUD_OGL_Class::draw_or_erase_unclipped_shape(short x, short y, shape_descriptor shape, bool draw)
 {
 	if (draw) {
@@ -546,7 +548,7 @@ void HUD_OGL_Class::draw_or_erase_unclipped_shape(short x, short y, shape_descri
 		DrawShapeAtXY(shape, x + r->left, y + r->top);
 	}
 }
-
+#endif
 void HUD_SW_Class::erase_entity_blip(point2d *location, shape_descriptor shape)
 {
 	struct bitmap_definition *mount, *virgin_mount, *blip;
@@ -578,7 +580,7 @@ void HUD_SW_Class::draw_entity_blip(point2d *location, shape_descriptor shape)
 		location->x + (motion_sensor_side_length>>1) - (blip->width>>1),
 		location->y + (motion_sensor_side_length>>1) - (blip->height>>1));
 }
-
+#ifdef HAVE_OPENGL // gp2x/dingoo hack
 void HUD_OGL_Class::draw_entity_blip(point2d *location, shape_descriptor shape)
 {
 	bitmap_definition *blip;
@@ -596,7 +598,7 @@ void HUD_OGL_Class::draw_entity_blip(point2d *location, shape_descriptor shape)
 		true);
 	DisableClipPlane();
 }
-
+#endif
 /* if we find an entity that is being removed, we continue with the removal process and ignore
 	the new signal; the new entity will probably not be added to the sensor again for a full
 	second or so (the range should be set so that this is reasonably hard to do) */

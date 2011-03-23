@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Type definitions for Lua objects
@@ -379,3 +381,4 @@ LUAI_FUNC void luaO_chunkid (char *out, const char *source, size_t len);
 
 #endif
 
+#endif

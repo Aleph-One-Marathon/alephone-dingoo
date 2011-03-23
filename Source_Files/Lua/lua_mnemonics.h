@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_MNEMONICS.H
 
@@ -869,3 +871,4 @@ const lang_def Lua_TextureType_Mnemonics[] = {
 {"interface", 4},
 {0, 0}
 };
+#endif

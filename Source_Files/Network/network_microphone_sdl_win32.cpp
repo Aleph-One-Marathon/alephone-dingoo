@@ -38,6 +38,7 @@
  *     factored out parts useful on other platforms into network_microphone_shared.cpp
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include    "cseries.h"

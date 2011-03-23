@@ -117,10 +117,9 @@
 // Defined in shell_misc.cpp
 extern bool CheatsActive;
 
-// We want this one to see if we are in map view or not so we can
-// reassign those Dingoo shoulderbuttons - Nigel.
+#ifdef HAVE_DINGOO // We want this one to see if we are in map view or not so we can reassign those Dingoo shoulderbuttons - Nigel.
 extern struct view_data *world_view;
-
+#endif
 
 // Data directories
 vector <DirectorySpecifier> data_search_path; // List of directories in which data files are searched for
@@ -128,8 +127,9 @@ DirectorySpecifier local_data_dir;    // Local (per-user) data file directory
 DirectorySpecifier preferences_dir;   // Directory for preferences
 DirectorySpecifier saved_games_dir;   // Directory for saved games
 DirectorySpecifier recordings_dir;    // Directory for recordings (except film buffer, which is stored in local_data_dir)
+#ifdef HAVE_DINGOO
 DirectorySpecifier user_data_path;    // A1 Dingoo path hack -- Nigel
-
+#endif
 std::string arg_directory;
 
 // Command-line options
@@ -232,6 +232,9 @@ int main(int argc, char **argv)
 #ifdef HAVE_LUA
 	  "\nBuilt with Lua scripting enabled.\n"
 #endif
+#ifdef HAVE_DINGOO
+	  "\nBuilt for Dingux.\n"
+#endif
     );
 
 	// Parse arguments
@@ -309,7 +312,11 @@ static void initialize_application(void)
 #if defined(unix) || defined(__NetBSD__) || defined(__OpenBSD__) || (defined(__APPLE__) && defined(__MACH__) && !defined(HAVE_BUNDLE_NAME))
 
 	default_data_dir = PKGDATADIR;
-	const char *home = getenv("PWD"); // GP2x/Dingoo hack - store everything in the A1 dir instead of home
+#ifdef HAVE_DINGOO // GP2x/Dingoo hack - store everything in the A1 dir instead of home
+	const char *home = getenv("PWD");
+#else
+	const char *home = getenv("HOME");
+#endif
 	if (home)
 		local_data_dir = home;
 	local_data_dir += ".alephone";
@@ -401,12 +408,7 @@ static void initialize_application(void)
 		data_search_path.push_back(local_data_dir);
 	}
 
-/*	// Subdirectories
-	preferences_dir = local_data_dir;
-	saved_games_dir = local_data_dir + "Saved Games";
-	recordings_dir = local_data_dir + "Recordings"; */
-
-	// We definitely don't want the savegames to mix up on the Dingoo, begin hack -- Nigel
+#ifdef HAVE_DINGOO // We definitely don't want the savegames to mix up on the Dingoo, begin hack -- Nigel
 	const char *userdata_env = getenv("ALEPHONE_USERDATA");
 	if (userdata_env)
 	{
@@ -422,10 +424,16 @@ static void initialize_application(void)
 		saved_games_dir = local_data_dir + "Saved Games";
 		recordings_dir = local_data_dir + "Recordings";
 	}
-	// End Dingoo hack, continues a bit further down
-
+#else // End Dingoo hack, continues a bit further down
+	// Subdirectories
+	preferences_dir = local_data_dir;
+	saved_games_dir = local_data_dir + "Saved Games";
+	recordings_dir = local_data_dir + "Recordings";
+#endif
 	// Create local directories
+#ifdef HAVE_DINGOO
 	preferences_dir.CreateDirectory(); // Part of dingoo per-game-subdir hack
+#endif
 	local_data_dir.CreateDirectory();
 	saved_games_dir.CreateDirectory();
 	recordings_dir.CreateDirectory();
@@ -433,16 +441,20 @@ static void initialize_application(void)
 	DirectorySpecifier local_mml_dir = bundle_data_dir + "MML";
 #else
 	DirectorySpecifier local_mml_dir = local_data_dir + "MML";
+#ifdef HAVE_DINGOO
 	if (userdata_env) // Continue dingoo per-game-subdir hack
 		local_mml_dir = user_data_path + "MML";
+#endif
 #endif
 	local_mml_dir.CreateDirectory();
 #if defined(HAVE_BUNDLE_NAME)
 	DirectorySpecifier local_themes_dir = bundle_data_dir + "Themes";
 #else
 	DirectorySpecifier local_themes_dir = local_data_dir + "Themes";
+#ifdef HAVE_DINGOO
 	if (userdata_env) // Continue dingoo per-game-subdir hack, no more dirs after this
 		local_themes_dir = user_data_path + "Themes";
+#endif
 #endif
 	local_themes_dir.CreateDirectory();
 	// Setup resource manager
@@ -837,6 +849,7 @@ static void handle_game_key(const SDL_Event &event)
 				}
 			}
 		}
+#ifdef HAVE_DINGOO
 		// Overhead map zooming Dingoo hack
 		// Obviously disables whatever other functions the shoulder buttons are
 		// assigned to when in map view - Nigel
@@ -857,6 +870,7 @@ static void handle_game_key(const SDL_Event &event)
 					PlayInterfaceButtonSound(Sound_ButtonFailure());
 			}
 		}
+#endif
 		else if (key == input_preferences->shell_keycodes[_key_volume_up])
 		{
 			changed_prefs = SoundManager::instance()->AdjustVolumeUp(_snd_adjust_volume);
@@ -870,7 +884,8 @@ static void handle_game_key(const SDL_Event &event)
 			walk_player_list();
 			render_screen(NONE);
 		}
-		/* else if (key == input_preferences->shell_keycodes[_key_zoom_in])
+#ifndef HAVE_DINGOO // This is the original code, note the Ndef -- Nigel
+		else if (key == input_preferences->shell_keycodes[_key_zoom_in])
 		{
 			if (zoom_overhead_map_in())
 				PlayInterfaceButtonSound(Sound_ButtonSuccess());
@@ -883,7 +898,8 @@ static void handle_game_key(const SDL_Event &event)
 				PlayInterfaceButtonSound(Sound_ButtonSuccess());
 			else
 				PlayInterfaceButtonSound(Sound_ButtonFailure());
-		} */
+		}
+#endif
 		else if (key == input_preferences->shell_keycodes[_key_inventory_left])
 		{
 			if (player_controlling_game()) {
@@ -914,11 +930,13 @@ static void handle_game_key(const SDL_Event &event)
 #endif
 				PlayInterfaceButtonSound(Sound_ButtonSuccess());
 			} 
+#ifdef HAVE_LUA // gp2x/dingoo hack
 			else if (Console::instance()->use_lua_console())
 			{
 				PlayInterfaceButtonSound(Sound_ButtonSuccess());
 				Console::instance()->activate_input(ExecuteLuaString, ">");
 			}
+#endif
 			else
 			{
 				PlayInterfaceButtonSound(Sound_ButtonFailure());
@@ -1143,7 +1161,7 @@ static void process_game_key(const SDL_Event &event)
 			stop_interface_fade();
 		int item = -1;
 		switch (event.key.keysym.sym) {
-		// Nigel: START dirty use-menu-without-mouse hack
+#ifdef HAVE_DINGOO // Nigel: START use-menu-without-mouse hack
 		case SDLK_RETURN: // Dingoo button START
 			item = iNewGame;
 			break;
@@ -1171,7 +1189,8 @@ static void process_game_key(const SDL_Event &event)
 		case SDLK_F9:
 			dump_screen();
 			break;
-/*		case SDLK_n:
+#else
+		case SDLK_n:
 			item = iNewGame;
 			break;
 		case SDLK_o:
@@ -1212,8 +1231,7 @@ static void process_game_key(const SDL_Event &event)
 				toggle_fullscreen();
 			}
 			break;
-*/
-		// Nigel: END dirty use-menu-without-mouse hack
+#endif // HAVE_DINGOO
 		default:
 			break;
 		}

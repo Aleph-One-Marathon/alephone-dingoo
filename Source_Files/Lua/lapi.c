@@ -3,6 +3,8 @@
 ** Lua API
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #include <assert.h>
@@ -1078,3 +1080,4 @@ LUA_API const char *lua_setupvalue (lua_State *L, int funcindex, int n) {
   return name;
 }
 
+#endif

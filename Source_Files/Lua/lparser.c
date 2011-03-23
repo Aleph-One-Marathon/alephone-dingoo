@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Lua Parser
@@ -1335,3 +1337,4 @@ static void chunk (LexState *ls) {
 }
 
 /* }====================================================================== */
+#endif

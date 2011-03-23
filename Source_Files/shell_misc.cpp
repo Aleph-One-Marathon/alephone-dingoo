@@ -329,8 +329,10 @@ void handle_keyword(int tag)
 void global_idle_proc(void)
 {
 	Music::instance()->Idle();
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 	network_speaker_idle_proc();
 	network_microphone_idle_proc();
+#endif
 	SoundManager::instance()->Idle();
 }
 

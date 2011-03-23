@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Standard Operating System library
@@ -242,3 +244,4 @@ LUALIB_API int luaopen_os (lua_State *L) {
   return 1;
 }
 
+#endif

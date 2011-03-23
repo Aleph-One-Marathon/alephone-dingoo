@@ -27,6 +27,8 @@
 
 #ifndef NETWORK_LOOKUP_SDL_H
 #define NETWORK_LOOKUP_SDL_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include	"SSLP_API.h"
 
@@ -57,5 +59,5 @@ OSErr NetLookupOpen_SSLP(const unsigned char *type, short version,
 // Now unused - functionality handled in w_found_players widget type
 //void NetLookupRemove(short index);
 //void NetLookupInformation(short index, NetAddrBlock *address, NetEntityName *entity);
-
+#endif //disable_networking
 #endif//NETWORK_LOOKUP_SDL_H

@@ -27,6 +27,8 @@
 
 #ifndef COMMUNICATIONSCHANNEL_H
 #define COMMUNICATIONSCHANNEL_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 // Failures: on almost any nontrivial failure, the channel simply becomes disconnected.
 // In most cases future communication would be meaningless anyway.
@@ -258,4 +260,5 @@ private:
 	TCPsocket	mSocket;
 };
 
+#endif // disablenetworking
 #endif // COMMUNICATIONSCHANNEL_H

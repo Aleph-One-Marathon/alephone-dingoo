@@ -66,6 +66,7 @@ Apr 10, 2003 (Woody Zenfell):
 	and more consistent with other dialog code
 */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include	"cseries.h"

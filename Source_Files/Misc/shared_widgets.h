@@ -130,7 +130,8 @@ protected:
 	char* m_pref;
 };
 #endif
-
+#include "config.h"
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 class ChatHistory
 {
 public:
@@ -174,5 +175,5 @@ private:
 	ColorfulChatWidgetImpl* m_componentWidget;
 	ChatHistory* m_history;
 };
-
+#endif
 #endif

@@ -78,7 +78,6 @@ struct interface_font_info
 /* --------- Globals. */
 // LP change: hardcoding this quantity since we know how many we need
 // Putting in the Moo definitions
-// y-top/x-left/y-bottom/x-right  -- Nigel
 static screen_rectangle interface_rectangles[NUMBER_OF_INTERFACE_RECTANGLES] = 
 {
 	{326, 300, 338, 473},
@@ -88,18 +87,18 @@ static screen_rectangle interface_rectangles[NUMBER_OF_INTERFACE_RECTANGLES] =
 	{0, 0, 0, 0},
 	{352, 204, 454, 384},
 	{352, 384, 454, 596},
-	{179, 101, 210, 268}, // New game button
-	{221, 25, 253, 238}, // Continue Saved Game
-	{263, 11, 294, 223}, // Gather Network Game
-	{301, 38, 333, 236}, // Join Network Game
-	{304, 421, 331, 563}, // Preferences button
-	{386, 231, 413, 406}, // Replay Last Film
-	{345, 363, 372, 516}, // Save Last Film
-	{344, 83, 374, 271}, // Replay Saved Film
-	{206, 246, 347, 382}, // Credits (M2/Inf logo)
+	{179, 101, 210, 268},
+	{221, 25, 253, 238},
+	{263, 11, 294, 223},
+	{301, 38, 333, 236},
+	{304, 421, 331, 563},
+	{386, 231, 413, 406},
+	{345, 363, 372, 516},
+	{344, 83, 374, 271},
+	{206, 246, 347, 382},
 	// {264, 522, 291, 588}, // inf's bounds
 	// {263, 497, 294, 565}, // m2's bounds
-	{263, 500, 294, 585}, // Quit
+	{263, 500, 294, 585}, // adjusted to work with both m2 and inf
       	{0,0,0,0},
 	{0, 0, 0, 0},
 };

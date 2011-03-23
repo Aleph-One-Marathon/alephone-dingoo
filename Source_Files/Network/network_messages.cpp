@@ -21,6 +21,7 @@ NETWORK_MESSAGES.CPP
 
 */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"

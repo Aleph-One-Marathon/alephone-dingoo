@@ -20,6 +20,8 @@
 
  */
 
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include <Carbon/Carbon.h>
 #include <AudioUnit/AudioUnit.h>
@@ -258,3 +260,4 @@ void network_microphone_idle_proc()
 	// do nothing
 }
 
+#endif //disable_networking

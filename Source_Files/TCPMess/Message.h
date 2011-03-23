@@ -27,6 +27,8 @@
 
 #ifndef MESSAGE_H
 #define MESSAGE_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include <string.h>	// memcpy
 #include "SDL.h"
@@ -239,5 +241,5 @@ public:
 	COVARIANT_RETURN(Message*, DatalessMessage<tMessageType>*) clone() const
 	{ return new DatalessMessage<tMessageType>; }
 };
-
+#endif // disablenetworking
 #endif // MESSAGE_H

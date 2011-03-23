@@ -244,7 +244,9 @@ void detonate_projectile(
 	damage_monsters_in_radius(NONE, owner_index, owner_type, origin, polygon_index,
 		definition->area_of_effect, damage, NONE);
 	if (definition->detonation_effect!=NONE) new_effect(origin, polygon_index, definition->detonation_effect, 0);
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	L_Call_Projectile_Detonated(type, owner_index, polygon_index, *origin);
+#endif
 }
 
 short new_projectile(
@@ -485,10 +487,10 @@ void move_projectiles(
 								// Some of the later routines may set both "hit landscape" and "hit media",
 								// so be careful.
 								if (flags&_projectile_hit_landscape && !(flags&_projectile_hit_media)) detonation_effect= NONE;
-								
 								if (detonation_effect!=NONE) new_effect(&new_location, new_polygon_index, detonation_effect, object->facing);
-                L_Call_Projectile_Detonated(projectile->type, projectile->owner_index, new_polygon_index, new_location);
-
+#ifdef HAVE_LUA // gp2x/dingoo hack
+								L_Call_Projectile_Detonated(projectile->type, projectile->owner_index, new_polygon_index, new_location);
+#endif
 								if ((definition->flags&_persistent_and_virulent) && !destroy_persistent_projectile && monster_obstruction_index!=NONE)
 								{
 									projectile->owner_index= monster_obstruction_index; /* keep going, but donÕt hit this target again */
@@ -544,7 +546,9 @@ void remove_projectile(
 	short projectile_index)
 {
 	struct projectile_data *projectile= get_projectile_data(projectile_index);
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	L_Invalidate_Projectile(projectile_index);
+#endif
 	remove_map_object(projectile->object_index);
 	MARK_SLOT_AS_FREE(projectile);
 }

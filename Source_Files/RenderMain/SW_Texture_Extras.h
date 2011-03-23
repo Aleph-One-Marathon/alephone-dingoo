@@ -21,7 +21,9 @@ SW_TEXTURE_EXTRAS.H
 	http://www.gnu.org/licenses/gpl.html
 
 */
-
+#include "config.h"
+#ifndef HAVE_DINGOO // This is apparently used for software alpha transparency(?), which does not work on the Dingoo (or at all?). Might be able to gain some here. -- Nigel
+					// EDIT: No gain but a slightly smaller binary. Oh well. No loss either so leaving this.
 #include "cseries.h"
 #include "cstypes.h"
 #include "shape_descriptors.h"
@@ -80,3 +82,4 @@ private:
 XML_ElementParser *SW_Texture_Extras_GetParser();
 
 #endif
+#endif // HAVE_DINGOO

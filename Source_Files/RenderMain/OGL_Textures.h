@@ -34,6 +34,9 @@ May 3, 2003 (Br'fin (Jeremy Parsons))
 #ifndef _OGL_TEXTURES
 #define _OGL_TEXTURES
 
+#include "config.h"
+#ifdef HAVE_OPENGL // GP2x/Dingoo hack
+
 // Initialize the texture accounting
 void OGL_StartTextures();
 
@@ -43,7 +46,6 @@ void OGL_StopTextures();
 // Call this after every frame for housekeeping stuff
 void OGL_FrameTickTextures();
 
-#ifdef HAVE_OPENGL // GP2x/Dingoo hack
 // State of an individual texture set:
 struct TextureState
 {

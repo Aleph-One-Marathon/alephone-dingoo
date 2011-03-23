@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 #ifndef __LUA_TEMPLATES_H
 #define __LUA_TEMPLATES_H
 
@@ -993,4 +995,5 @@ void L_ObjectClass<name, object_t, index_t>::Invalidate(lua_State *L, index_t in
 
 #endif
 
+#endif
 #endif

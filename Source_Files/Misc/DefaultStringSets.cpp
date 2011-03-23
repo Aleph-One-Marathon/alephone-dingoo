@@ -22,7 +22,7 @@
 
     June 3, 2002: captured text_strings.mml into C++ form for this file.
 */
-
+#include "config.h" //for eclipse -- Nigel
 #include    "cseries.h"
 
 #include    "TextStrings.h"
@@ -325,7 +325,9 @@ static const char* sStringSetNumber135[] = {
     "Disconnecting...",
     "Connection Terminated.",
     "%H%M %m.%d.%Y",
-    "", // Dingoo doesn't like a lot of text on the small screen -- Nigel
+#ifdef HAVE_DINGOO // Dingoo doesn't like a lot of text on the small screen -- Nigel
+    "",
+#endif
 };
 
 // STR# Resource: "Join Dialog Messages"

@@ -28,6 +28,8 @@
 Oct 13, 2000 (Loren Petrich)
 	Converted the various lists into Standard Template Library vectors
 */
+#include "config.h"
+#ifdef HAVE_OPENGL
 
 #include <vector>
 #include "OverheadMapRenderer.h"
@@ -103,5 +105,5 @@ class OverheadMap_OGL_Class: public OverheadMapClass
 
 public:
 };
-
+#endif
 #endif

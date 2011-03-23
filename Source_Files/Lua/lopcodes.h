@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Opcodes for Lua virtual machine
@@ -265,4 +267,5 @@ LUAI_DATA const char *const luaP_opnames[NUM_OPCODES+1];  /* opcode names */
 #define LFIELDS_PER_FLUSH	50
 
 
+#endif
 #endif

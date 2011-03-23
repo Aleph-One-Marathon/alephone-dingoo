@@ -38,6 +38,8 @@
         Using A1's Logging system instead of older diagnostic-message schemes
 
  */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 // This stuff (or equivalent) should be widely available...
 #include	<assert.h>
@@ -815,3 +817,4 @@ void UnpackPacket(unsigned char *Packed, SSLP_Packet *Unpacked)
 	PacketCopyOutList(Packed,Unpacked->sslpp_service_name,SSLP_MAX_NAME_LENGTH);
 }
 
+#endif // disablenetworking

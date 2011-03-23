@@ -1404,11 +1404,17 @@ void w_progress_bar::set_progress(int inValue, int inMaxValue)
  *  Slider
  */
 
-const int SLIDER_WIDTH = 80; //160; Dingoo interface hack -- Nigel.
-const int SLIDER_THUMB_HEIGHT = 7;//14;
-const int SLIDER_THUMB_WIDTH = 4; //8;
-const int SLIDER_TROUGH_HEIGHT = 4; //8;
-
+#ifdef HAVE_DINGOO // Dingoo interface hack
+const int SLIDER_WIDTH = 80;
+const int SLIDER_THUMB_HEIGHT = 7;
+const int SLIDER_THUMB_WIDTH = 4;
+const int SLIDER_TROUGH_HEIGHT = 4;
+#else
+const int SLIDER_WIDTH = 160;
+const int SLIDER_THUMB_HEIGHT = 14;
+const int SLIDER_THUMB_WIDTH = 8;
+const int SLIDER_TROUGH_HEIGHT = 8;
+#endif
 w_slider::w_slider(int num, int s) : widget(LABEL_WIDGET), selection(s), num_items(num), thumb_dragging(false)
 {
 	slider_l = get_theme_image(SLIDER_WIDGET, DEFAULT_STATE, SLIDER_L_IMAGE);
@@ -1562,8 +1568,11 @@ int w_slider::thumb_width() const
 
 w_list_base::w_list_base(uint16 width, size_t lines, size_t /*sel*/) : widget(ITEM_WIDGET), num_items(0), shown_items(lines), thumb_dragging(false)
 {
-	// rect.w = width;
-	rect.w = width>>1; // Dingoo list hack, makes save dialogs etc fit on screen, they're specced @ 400 everywhere, 200 is enough tho - Nigel
+#ifdef HAVE_DINGOO // Dingoo list hack, makes save dialogs etc fit on screen, they're specced @ 400 everywhere, 200 is enough tho - Nigel
+	rect.w = width>>1;
+#else
+	rect.w = width;
+#endif
 	rect.h = item_height() * static_cast<uint16>(shown_items) + get_theme_space(LIST_WIDGET, T_SPACE) + get_theme_space(LIST_WIDGET, B_SPACE);
 
 	frame_tl = get_theme_image(LIST_WIDGET, DEFAULT_STATE, TL_IMAGE);
@@ -2040,7 +2049,7 @@ w_file_chooser::update_filename()
 		set_selection(sFileChooserInvalidFileString);
 }
 
-
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 const string w_items_in_room_get_name_of_item (GameListMessage::GameListEntry item)
 {
 	return item.name ();
@@ -2201,7 +2210,7 @@ void w_games_in_room::draw_item(const GameListMessage::GameListEntry& item, SDL_
 
 	set_drawing_clip_rectangle(SHRT_MIN, SHRT_MIN, SHRT_MAX, SHRT_MAX);
 }
-
+#endif
 
 static inline uint8 darken(uint8 component, uint8 amount)
 {
@@ -2212,7 +2221,7 @@ static inline uint8 lighten(uint8 component, uint8 amount)
 {
 	return PIN((uint16) component + (255 - component) * amount / 255, 0, 255);
 }
-
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 void w_players_in_room::draw_item(const MetaserverPlayerInfo& item, SDL_Surface* s,
 					int16 x, int16 y, uint16 width, bool selected) const
 {
@@ -2469,7 +2478,7 @@ void w_colorful_chat::draw_item(vector<ColoredChatEntry>::const_iterator it, SDL
 
 	set_drawing_clip_rectangle(SHRT_MIN, SHRT_MIN, SHRT_MAX, SHRT_MAX);
 }
-
+#endif
 void SDLWidgetWidget::hide ()
 {
 	hidden = true;
@@ -2494,6 +2503,7 @@ void SDLWidgetWidget::activate ()
 	m_widget->set_enabled (!hidden);
 }
 
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 
 PlayersInGameWidget::PlayersInGameWidget (w_players_in_game2* pig)
 	: SDLWidgetWidget (pig)
@@ -2506,6 +2516,6 @@ void PlayersInGameWidget::redraw ()
 	m_pig->update_display ();
 	m_pig->get_owning_dialog ()->draw_dirty_widgets ();
 }
-
+#endif
 
 

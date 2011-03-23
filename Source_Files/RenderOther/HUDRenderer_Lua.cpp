@@ -19,6 +19,8 @@ HUD_RENDERER_LUA.CPP
 
     Implements HUD helper class for Lua HUD themes
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 #include "HUDRenderer_Lua.h"
 
@@ -407,3 +409,4 @@ void HUD_Lua_Class::draw_shape(Shape_Blitter *shape, float x, float y)
         shape->SDL_Draw(SDL_GetVideoSurface(), r);
     }
 }
+#endif

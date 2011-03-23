@@ -27,6 +27,8 @@ Feb 1, 2003 (Woody Zenfell):
         Merged SDL-style and Mac-style network audio interfaces.  Both use this now.
         This is the main interface for external code wanting to use the network audio support.
 */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"
 
@@ -74,5 +76,5 @@ void    network_microphone_idle_proc();
 
 // Cleanup - multiple calls should be safe.
 void    close_network_microphone();
-
+#endif // disable_networking
 #endif

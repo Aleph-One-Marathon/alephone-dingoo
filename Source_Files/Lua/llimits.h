@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Limits, basic types, and some other `installation-dependent' definitions
@@ -125,4 +127,5 @@ typedef lu_int32 Instruction;
 #define condhardstacktests(x)	x
 #endif
 
+#endif
 #endif

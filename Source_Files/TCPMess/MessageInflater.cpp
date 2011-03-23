@@ -25,6 +25,7 @@
   SOFTWARE.
 */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "MessageInflater.h"

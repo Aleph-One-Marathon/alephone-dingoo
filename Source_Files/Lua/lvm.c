@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Lua virtual machine
@@ -762,4 +764,4 @@ void luaV_execute (lua_State *L, int nexeccalls) {
     }
   }
 }
-
+#endif

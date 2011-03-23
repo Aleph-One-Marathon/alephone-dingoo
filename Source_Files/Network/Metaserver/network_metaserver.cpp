@@ -22,6 +22,7 @@
 	Created.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"
@@ -677,5 +678,4 @@ MetaserverClient::~MetaserverClient()
 	disconnect();
 	s_instances.erase(this);
 }
-
 #endif // !defined(DISABLE_NETWORKING)

@@ -314,13 +314,14 @@ static XML_DColorParser ActiveTabColorParser(TAB_WIDGET, ACTIVE_STATE, 3);
 static XML_DColorParser PressedTabColorParser(TAB_WIDGET, PRESSED_STATE, 3);
 static XML_DColorParser DisabledTabColorParser(TAB_WIDGET, DISABLED_STATE, 3);
 static XML_DColorParser ChatEntryColorParser(CHAT_ENTRY, DEFAULT_STATE, 1);
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 static XML_DColorParser MetaserverGamesColorParser(METASERVER_GAMES, w_games_in_room::GAME, 3);
 static XML_DColorParser RunningMetaserverGamesColorParser(METASERVER_GAMES, w_games_in_room::RUNNING_GAME, 3);
 static XML_DColorParser IncompatibleMetaserverGamesColorParser(METASERVER_GAMES, w_games_in_room::INCOMPATIBLE_GAME, 3);
 static XML_DColorParser SelectedMetaserverGamesColorParser(METASERVER_GAMES, w_games_in_room::SELECTED_GAME, 3);
 static XML_DColorParser SelectedRunningMetaserverGamesColorParser(METASERVER_GAMES, w_games_in_room::SELECTED_RUNNING_GAME, 3);
 static XML_DColorParser SelectedIncompatibleMetaserverGamesColorParser(METASERVER_GAMES, w_games_in_room::SELECTED_INCOMPATIBLE_GAME, 3);
-
+#endif
 
 class XML_DFontParser : public XML_ElementParser {
 public:
@@ -722,6 +723,7 @@ public:
 
 	bool HandleAttribute(const char *tag, const char *value)
 	{
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 		if (StringsEqual(tag, "entries"))
 		{
 			return ReadNumericalValue(value, "%hu", dialog_theme[METASERVER_GAMES].spaces[w_games_in_room::GAME_ENTRIES]);
@@ -733,6 +735,9 @@ public:
 			return false;
 		}
 		return true;
+#else
+		return false;
+#endif
 	}
 };
 
@@ -874,7 +879,7 @@ XML_ElementParser *Theme_GetParser()
 	TabParser.AddChild(&DisabledTabParser);
 	TabParser.AddChild(&PressedTabParser);
 	ThemeParser.AddChild(&TabParser);
-
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 	SelectedMetaserverGamesParser.AddChild(&SelectedMetaserverGamesColorParser);
 	SelectedRunningMetaserverGamesParser.AddChild(&SelectedRunningMetaserverGamesColorParser);
 	RunningMetaserverGamesParser.AddChild(&SelectedRunningMetaserverGamesParser);
@@ -891,6 +896,7 @@ XML_ElementParser *Theme_GetParser()
 
 	MetaserverPlayersParser.AddChild(&MetaserverPlayersFontParser);
 	MetaserverParser.AddChild(&MetaserverPlayersParser);
+#endif
 	ThemeParser.AddChild(&MetaserverParser);
 
 	return &ThemeParser;
@@ -1069,7 +1075,7 @@ static void set_theme_defaults(void)
 	dialog_theme[CHAT_ENTRY].spaces[0] = 100;
 
 	dialog_theme[METASERVER_PLAYERS].spaces[0] = 8;
-
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 	dialog_theme[METASERVER_GAMES].spaces[w_games_in_room::GAME_SPACING] = 4;
 	dialog_theme[METASERVER_GAMES].spaces[w_games_in_room::GAME_ENTRIES] = 3;
 	dialog_theme[METASERVER_GAMES].states[w_games_in_room::GAME].colors[FOREGROUND_COLOR] = make_color(0xff, 0xff, 0xff);
@@ -1083,7 +1089,7 @@ static void set_theme_defaults(void)
 	dialog_theme[METASERVER_GAMES].states[w_games_in_room::SELECTED_INCOMPATIBLE_GAME].colors[BACKGROUND_COLOR] = make_color(0xff, 0xff, 0xff);
 	dialog_theme[METASERVER_GAMES].states[w_games_in_room::SELECTED_RUNNING_GAME].colors[FOREGROUND_COLOR] = make_color(0x7f, 0x7f, 0x7f);
 	dialog_theme[METASERVER_GAMES].states[w_games_in_room::SELECTED_RUNNING_GAME].colors[BACKGROUND_COLOR] = make_color(0xff, 0xff, 0xff);
-
+#endif
 }
 
 /*

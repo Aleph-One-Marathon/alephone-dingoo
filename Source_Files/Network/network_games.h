@@ -24,6 +24,8 @@
 	Wednesday, July 19, 1995 11:03:09 AM- rdm created.
 
 */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 struct player_ranking_data {
 	short player_index;
@@ -73,3 +75,4 @@ enum
 short get_network_compass_state(short player_index);
 
 #endif
+#endif // disable_networking

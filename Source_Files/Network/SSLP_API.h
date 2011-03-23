@@ -37,6 +37,8 @@
 
 #ifndef SSLP_API_H
 #define	SSLP_API_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include	<SDL_net.h>
 
@@ -160,5 +162,5 @@ SSLP_Hint_Service_Discovery(const SSLP_ServiceInstance* inServiceInstance, const
 void
 SSLP_Disallow_Service_Discovery(const SSLP_ServiceInstance* inServiceInstance);
 
-
+#endif // disablenetworking
 #endif//SSLP_API_H

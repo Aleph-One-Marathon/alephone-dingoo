@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Some generic functions over Lua objects
@@ -212,3 +214,4 @@ void luaO_chunkid (char *out, const char *source, size_t bufflen) {
     }
   }
 }
+#endif

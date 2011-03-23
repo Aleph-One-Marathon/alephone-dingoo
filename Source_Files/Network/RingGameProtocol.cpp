@@ -23,6 +23,7 @@
  *  Implementation of the old ring-topology network game protocol, as a module in the new scheme.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"

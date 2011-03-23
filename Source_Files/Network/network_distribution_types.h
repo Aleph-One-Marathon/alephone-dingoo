@@ -27,10 +27,12 @@
 
 #ifndef NETWORK_DISTRIBUTION_TYPES_H
 #define NETWORK_DISTRIBUTION_TYPES_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 enum {
         kOriginalNetworkAudioDistributionTypeID = 0,    // for compatibility with older versions
         kNewNetworkAudioDistributionTypeID = 1          // new-style realtime network audio data
 };
-
+#endif // disable_networking
 #endif // NETWORK_DISTRIBUTION_TYPES_H

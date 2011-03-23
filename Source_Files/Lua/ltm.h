@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Tag methods
@@ -51,4 +53,5 @@ LUAI_FUNC const TValue *luaT_gettmbyobj (lua_State *L, const TValue *o,
                                                        TMS event);
 LUAI_FUNC void luaT_init (lua_State *L);
 
+#endif
 #endif

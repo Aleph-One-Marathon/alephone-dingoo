@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 
 #ifndef LUA_SCRIPT_H
 #define LUA_SCRIPT_H
@@ -124,4 +126,5 @@ struct lua_camera //an expanded version of script_camera; uses Lua's path scheme
     int player_active;
 };
 
+#endif
 #endif

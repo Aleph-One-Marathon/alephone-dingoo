@@ -387,8 +387,9 @@ enum {
 static int
 update_world_elements_one_tick()
 {
+#ifdef HAVE_LUA // GP2x/Dingoo hack
         L_Call_Idle();
-
+#endif
         update_lights();
         update_medias();
         update_platforms();
@@ -451,7 +452,11 @@ update_world()
                 // Note that GameQueue should be stocked evenly (i.e. every player has the same # of flags)
                 if(GameQueue->countActionFlags(0) == 0)
                 {
-                        canUpdate = overlay_queue_with_queue_into_queue(GetRealActionQueues(), GetLuaActionQueues(), GameQueue);
+#ifdef HAVE_LUA // gp2x/dingoo hack
+                	canUpdate = overlay_queue_with_queue_into_queue(GetRealActionQueues(), GetLuaActionQueues(), GameQueue);
+#else
+                	canUpdate = overlay_queue_with_queue_into_queue(GetRealActionQueues(), NULL, GameQueue);
+#endif
                 }
 
 		if(!sPredictionWanted)
@@ -486,8 +491,9 @@ update_world()
 
                 theElapsedTime++;
 
-                
+#ifdef HAVE_LUA // GP2x/Dingoo hack
                 L_Call_PostIdle();
+#endif
                 if(theUpdateResult != kUpdateNormalCompletion)
                 {
                         canUpdate = false;
@@ -519,8 +525,9 @@ update_world()
 	
 	if(theUpdateResult == kUpdateNormalCompletion && sPredictionWanted)
 	{
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 		NetUpdateUnconfirmedActionFlags();
-
+#endif
 		// We use "2" to make sure there's always room for our one set of elements.
 		// (thePredictiveQueues should always hold only 0 or 1 element for each player.)
 		ActionQueues	thePredictiveQueues(dynamic_world->player_count, 2, true);
@@ -528,6 +535,7 @@ update_world()
 		// Observe, since we don't use a speed-limiter in predictive mode, that there cannot be flags
 		// stranded in the GameQueue.  Unfortunately this approach will mispredict if a script is
 		// controlling the local player.  We could be smarter about it if that eventually becomes an issue.
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing - this appears to be network only
 		for ( ; sPredictedTicks < NetGetUnconfirmedActionFlagsCount(); sPredictedTicks++)
 		{
 			// Real -> predictive transition, if necessary
@@ -546,7 +554,7 @@ update_world()
 			didPredict = true;
 			
 		} // loop while local player has flags we haven't used for prediction
-
+#endif
 	} // if we should predict
 
 	// we return separately 1. "whether to redraw" and 2. "how many game-ticks elapsed"
@@ -567,11 +575,13 @@ void leaving_map(
 	mark_all_monster_collections(false);
 	mark_player_collections(false);
 	mark_map_collections(false);
+#ifdef HAVE_LUA // GP2x/Dingoo hack
 	MarkLuaCollections(false);
     MarkLuaHUDCollections(false);
 	L_Call_Cleanup ();
 	//Close and unload the Lua state
 	CloseLuaScript();
+#endif
 #if !defined(DISABLE_NETWORKING)
 	NetSetChatCallbacks(NULL);
 #endif // !defined(DISABLE_NETWORKING)
@@ -611,12 +621,12 @@ bool entering_map(bool restoring_saved)
 	mark_all_monster_collections(true);
 	mark_player_collections(true);
 	mark_map_collections(true);
-
+#ifdef HAVE_LUA // GP2x/Dingoo hack
 	// ghs: load the Lua script here to see if it needs any additional collections
 	RunLuaScript();
 	MarkLuaCollections(true);
     MarkLuaHUDCollections(true);
-
+#endif
 #ifdef SDL
 	load_collections(true, get_screen_mode()->acceleration == _opengl_acceleration);
 #else
@@ -642,9 +652,9 @@ bool entering_map(bool restoring_saved)
 	reset_action_queues(); //¦¦
 //	sync_heartbeat_count();
 //	set_keyboard_controller_status(true);
-
+#ifdef HAVE_LUA // GP2x/Dingoo hack
 	L_Call_Init(restoring_saved);
-
+#endif
 #if !defined(DISABLE_NETWORKING)
 	NetSetChatCallbacks(InGameChatCallbacks::instance());
 #endif // !defined(DISABLE_NETWORKING)

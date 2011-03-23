@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_MONSTERS.CPP
 
@@ -440,4 +442,5 @@ static void compatibility(lua_State *L)
 	luaL_loadbuffer(L, compatibility_script, strlen(compatibility_script), "projectiles_compatibility");
 	lua_pcall(L, 0, 0, 0);
 }
+#endif
 #endif

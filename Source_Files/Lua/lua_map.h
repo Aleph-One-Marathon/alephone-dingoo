@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 #ifndef __LUA_MAP_H
 #define __LUA_MAP_H
 
@@ -132,4 +134,5 @@ int Lua_Map_register (lua_State *L);
 
 #endif
 
+#endif
 #endif

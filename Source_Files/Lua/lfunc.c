@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Auxiliary functions to manipulate prototypes and closures
@@ -172,3 +174,4 @@ const char *luaF_getlocalname (const Proto *f, int local_number, int pc) {
   return NULL;  /* not found */
 }
 
+#endif

@@ -22,6 +22,8 @@
 
 #ifndef NETWORK_MESSAGES_H
 #define NETWORK_MESSAGES_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"
 #include "AStream.h"
@@ -478,3 +480,4 @@ struct Client {
 
 
 #endif // NETWORK_MESSAGES_H
+#endif //disable_networking

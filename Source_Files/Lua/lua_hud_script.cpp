@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_HUD_SCRIPT.CPP
  
@@ -396,3 +398,4 @@ void MarkLuaHUDCollections(bool loading)
 
 
 #endif /* HAVE_LUA */
+#endif

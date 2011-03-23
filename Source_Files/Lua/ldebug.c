@@ -3,6 +3,8 @@
 ** Debug Interface
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #include <stdarg.h>
@@ -620,3 +622,4 @@ void luaG_runerror (lua_State *L, const char *fmt, ...) {
   luaG_errormsg(L);
 }
 
+#endif

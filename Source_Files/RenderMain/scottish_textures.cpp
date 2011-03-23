@@ -432,6 +432,7 @@ void Rasterizer_SW_Class::texture_horizontal_polygon(polygon_definition& texture
 				{
 					case _textured_transfer:
 					{
+#ifndef HAVE_DINGOO // sw alpha dingoo exclude -- Nigel
 						SW_Texture *sw_texture = 0;
 						if (graphics_preferences->software_alpha_blending)
 						{
@@ -445,7 +446,9 @@ void Rasterizer_SW_Class::texture_horizontal_polygon(polygon_definition& texture
 							else if (graphics_preferences->software_alpha_blending == _sw_alpha_nice) {
 								texture_horizontal_polygon_lines<pixel16, _sw_alpha_nice>(polygon->texture, screen, view, (struct _horizontal_polygon_line_data *) precalculation_table, vertices[highest_vertex].y, left_table, right_table, aggregate_total_line_count, sw_texture->opac_table());
 							}
-						} else {
+						} else
+#endif
+						{
 							texture_horizontal_polygon_lines<pixel16, _sw_alpha_off>(polygon->texture, screen, view, (struct _horizontal_polygon_line_data *)precalculation_table,
 											  vertices[highest_vertex].y, left_table, right_table, aggregate_total_line_count);
 						}
@@ -467,6 +470,7 @@ void Rasterizer_SW_Class::texture_horizontal_polygon(polygon_definition& texture
 				{
 				case _textured_transfer:
 				{
+#ifndef HAVE_DINGOO // sw alpha dingoo exclude -- Nigel
 					SW_Texture *sw_texture = 0;
 					if (graphics_preferences->software_alpha_blending)
 					{
@@ -483,7 +487,8 @@ void Rasterizer_SW_Class::texture_horizontal_polygon(polygon_definition& texture
 							texture_horizontal_polygon_lines<pixel32, _sw_alpha_nice>(polygon->texture, screen, view, (struct _horizontal_polygon_line_data *) precalculation_table, vertices[highest_vertex].y, left_table, right_table, aggregate_total_line_count, sw_texture->opac_table());
 						}
 					}
-					else 
+					else
+#endif
 					{
 						texture_horizontal_polygon_lines<pixel32, _sw_alpha_off>(polygon->texture, screen, view, (struct _horizontal_polygon_line_data *)precalculation_table,
 											  vertices[highest_vertex].y, left_table, right_table,
@@ -636,6 +641,7 @@ void Rasterizer_SW_Class::texture_vertical_polygon(polygon_definition& textured_
 				{
 				case _textured_transfer:
 				{
+#ifndef HAVE_DINGOO // sw alpha dingoo exclude -- Nigel
 					SW_Texture *sw_texture =0 ;
 					if (graphics_preferences->software_alpha_blending)
 					{
@@ -657,7 +663,9 @@ void Rasterizer_SW_Class::texture_vertical_polygon(polygon_definition& textured_
 								texture_vertical_polygon_lines<pixel16, _sw_alpha_nice, false>(screen, view, (struct _vertical_polygon_data *) precalculation_table, left_table, right_table, sw_texture->opac_table());
 							}
 						}
-					} else {
+					} else
+#endif
+					{
 						if (polygon->texture->flags & _TRANSPARENT_BIT) {
 							texture_vertical_polygon_lines<pixel16, _sw_alpha_off, true>(screen, view, (struct _vertical_polygon_data *)precalculation_table, left_table, right_table);
 						} else {
@@ -677,6 +685,7 @@ void Rasterizer_SW_Class::texture_vertical_polygon(polygon_definition& textured_
 				{
 					case _textured_transfer:
 					{
+#ifndef HAVE_DINGOO // sw alpha dingoo exclude -- Nigel
 						SW_Texture *sw_texture = 0;
 						if (graphics_preferences->software_alpha_blending)
 						{
@@ -697,7 +706,9 @@ void Rasterizer_SW_Class::texture_vertical_polygon(polygon_definition& textured_
 								else
 									texture_vertical_polygon_lines<pixel32, _sw_alpha_nice, false>(screen, view, (struct _vertical_polygon_data *) precalculation_table, left_table, right_table, sw_texture->opac_table());
 							}
-						} else {
+						} else
+#endif
+						{
 							if (polygon->texture->flags & _TRANSPARENT_BIT)
 								texture_vertical_polygon_lines<pixel32, _sw_alpha_off, true>(screen, view, (struct _vertical_polygon_data *)precalculation_table, left_table, right_table);
 							else

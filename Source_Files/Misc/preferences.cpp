@@ -51,7 +51,7 @@ May 22, 2003 (Woody Zenfell):
 /*
  *  preferences.cpp - Preferences handling
  */
-
+#include "config.h" // ... eclipse.
 #include "cseries.h"
 #include "FileHandler.h"
 
@@ -671,14 +671,15 @@ static void player_dialog(void *arg)
  *  Handle graphics dialog
  */
 
-/* Changing this for Dingoo to remove 32 bit, hope I can get away with these -- Nigel
-static const char *depth_labels[4] = {
-	"8 Bit", "16 Bit", "32 Bit", NULL
-};*/
+#ifdef HAVE_DINGOO //Changing this for Dingoo to remove 32 bit, hope I can get away with these -- Nigel
 static const char *depth_labels[3] = {
 	"8 Bit", "16 Bit", NULL
 };
-
+#else
+static const char *depth_labels[4] = {
+	"8 Bit", "16 Bit", "32 Bit", NULL
+};
+#endif
 
 static const char *resolution_labels[3] = {
 	"Low", "High", NULL
@@ -1934,6 +1935,7 @@ void WriteXML_PasString(FILE *F, const char *Prefix, const unsigned char *String
 void WriteXML_CString(FILE *F, const char *Prefix, const char *String, int MaxLen, const char *Suffix);
 void WriteXML_Char(FILE *F, unsigned char c);
 
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 extern void hub_set_minimum_send_period(int32);
 extern int32& hub_get_minimum_send_period();
 
@@ -1952,7 +1954,7 @@ struct get_latency_tolerance
 		screen_printf("latency tolerance is %i", hub_get_minimum_send_period());
 	}
 };
-
+#endif
 /*
  *  Initialize preferences (load from file or setup defaults)
  */
@@ -1981,10 +1983,13 @@ void initialize_preferences(
 		PrefsInited = true;
 
 		CommandParser PreferenceSetCommandParser;
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 		PreferenceSetCommandParser.register_command("latency_tolerance", set_latency_tolerance());
+#endif
 		CommandParser PreferenceGetCommandParser;
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 		PreferenceGetCommandParser.register_command("latency_tolerance", get_latency_tolerance());
-
+#endif
 		CommandParser PreferenceCommandParser;
 		PreferenceCommandParser.register_command("set", PreferenceSetCommandParser);
 		PreferenceCommandParser.register_command("get", PreferenceGetCommandParser);
@@ -2289,14 +2294,18 @@ static void *get_environment_pref_data() {return environment_preferences;}
  *  Setup default preferences
  */
 
-// Some defaults changed for Dingoo -- Nigel
 static void default_graphics_preferences(graphics_preferences_data *preferences)
 {
   memset(&preferences->screen_mode, '\0', sizeof(screen_mode_data));
 	preferences->screen_mode.gamma_level= DEFAULT_GAMMA_LEVEL;
 
-	preferences->screen_mode.width = 320; //640;
-	preferences->screen_mode.height = 240; //480; Hopefully enables extra mods to run without manual prefs file...
+#ifdef HAVE_DINGOO // Some defaults changed for Dingoo -- Nigel
+	preferences->screen_mode.width = 320;
+	preferences->screen_mode.height = 240;
+#else
+	preferences->screen_mode.width = 640;
+	preferences->screen_mode.height = 480;
+#endif
 	preferences->screen_mode.hud = true;
 	preferences->screen_mode.hud_scale_level = 0;
 	preferences->screen_mode.term_scale_level = 0;
@@ -2324,9 +2333,12 @@ static void default_graphics_preferences(graphics_preferences_data *preferences)
 	
 	OGL_SetDefaults(preferences->OGL_Configure);
 
-	preferences->double_corpse_limit= true; //false;
-	preferences->hog_the_cpu = true; //false;
-
+	preferences->double_corpse_limit= false;
+#ifdef HAVE_DINGOO // 15+% performance increase, so enable by default -- Nigel
+	preferences->hog_the_cpu = true;
+#else
+	preferences->hog_the_cpu = false;
+#endif
 	preferences->software_alpha_blending = _sw_alpha_off;
 
 #ifdef __WIN32__
@@ -2341,6 +2353,7 @@ static void default_serial_number_preferences(serial_number_data *preferences)
 
 static void default_network_preferences(network_preferences_data *preferences)
 {
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 	preferences->type= _ethernet;
 
 	preferences->allow_microphone = true;
@@ -2376,6 +2389,7 @@ static void default_network_preferences(network_preferences_data *preferences)
 	preferences->use_custom_metaserver_colors = false;
 	preferences->metaserver_colors[0] = get_interface_color(PLAYER_COLOR_BASE_INDEX);
 	preferences->metaserver_colors[1] = get_interface_color(PLAYER_COLOR_BASE_INDEX);
+#endif
 }
 
 static void default_player_preferences(player_preferences_data *preferences)
@@ -2532,6 +2546,7 @@ static bool validate_serial_number_preferences(serial_number_data *preferences)
 static bool validate_network_preferences(network_preferences_data *preferences)
 {
 	bool changed= false;
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
 
 	// Fix bool options
 	preferences->allow_microphone = !!preferences->allow_microphone;
@@ -2573,7 +2588,7 @@ static bool validate_network_preferences(network_preferences_data *preferences)
 		preferences->game_protocol= _network_game_protocol_default;
 		changed= true;
 	}
-
+#endif
 	return changed;
 }
 

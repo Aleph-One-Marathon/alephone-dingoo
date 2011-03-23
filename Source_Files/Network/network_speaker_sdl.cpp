@@ -33,6 +33,7 @@
  *      from the main thread: buffers are released by the audio system and returned to us for reuse.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include    "network_sound.h"

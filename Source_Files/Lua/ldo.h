@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Stack and Call structure of Lua
@@ -55,3 +57,4 @@ LUAI_FUNC void luaD_seterrorobj (lua_State *L, int errcode, StkId oldtop);
 
 #endif
 
+#endif

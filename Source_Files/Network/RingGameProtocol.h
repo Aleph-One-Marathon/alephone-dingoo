@@ -25,6 +25,8 @@
 
 #ifndef NETWORK_RING
 #define NETWORK_RING
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "NetworkGameProtocol.h"
 
@@ -54,4 +56,5 @@ public:
 extern void DefaultRingPreferences();
 extern void WriteRingPreferences(FILE* F);
 
+#endif // disablenetworking
 #endif // NETWORK_RING

@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_PLAYER.CPP
 
@@ -2642,4 +2644,5 @@ static void Lua_Player_load_compatibility(lua_State *L)
 	lua_pcall(L, 0, 0, 0);
 };
 
+#endif
 #endif

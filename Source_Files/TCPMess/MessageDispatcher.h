@@ -28,6 +28,8 @@
 
 #ifndef MESSAGEDISPATCHER_H
 #define MESSAGEDISPATCHER_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include <map>
 
@@ -94,5 +96,5 @@ private:
 	MessageDispatcherMap	mMap;
 	MessageHandler*		mDefaultHandler;
 };
-
+#endif // disablenetworking
 #endif // MESSAGEDISPATCHER_H

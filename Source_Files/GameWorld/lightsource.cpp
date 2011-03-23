@@ -280,9 +280,12 @@ bool set_light_status(
 		{
 			change_light_state(light_index, new_status ? _light_becoming_active : _light_becoming_inactive);
 			assert(light_index == static_cast<size_t>(static_cast<short>(light_index)));
-                        //MH: Lua script hook
-                        L_Call_Light_Activated(light_index);
-			assume_correct_switch_position(_panel_is_light_switch, static_cast<short>(light_index), new_status);
+#ifdef HAVE_LUA // GP2x/Dingoo hack
+
+			//MH: Lua script hook
+            L_Call_Light_Activated(light_index);
+#endif
+            assume_correct_switch_position(_panel_is_light_switch, static_cast<short>(light_index), new_status);
 			changed= true;
 		}
 	}

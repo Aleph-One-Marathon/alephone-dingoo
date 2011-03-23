@@ -22,6 +22,8 @@
  *
  *  Created by Woody Zenfell, III on Mon Sep 24 2001.
  */
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #ifndef __MWERKS__
 
@@ -251,4 +253,5 @@ SDLNetxint_CollectBroadcastAddresses(UDPsocket inSocket) {
     
     return sNumberOfBroadcastAddresses;
 }
+#endif //disable_networking
 #endif

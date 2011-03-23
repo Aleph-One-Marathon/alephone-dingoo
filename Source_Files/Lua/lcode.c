@@ -3,6 +3,8 @@
 ** Code generator for Lua
 ** See Copyright Notice in lua.h
 */
+#include "config.h"
+#ifdef HAVE_LUA
 
 
 #include <stdlib.h>
@@ -837,3 +839,4 @@ void luaK_setlist (FuncState *fs, int base, int nelems, int tostore) {
   fs->freereg = base + 1;  /* free registers with list values */
 }
 
+#endif

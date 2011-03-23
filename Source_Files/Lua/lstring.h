@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** String table (keep all strings handled by Lua)
@@ -28,4 +30,5 @@ LUAI_FUNC Udata *luaS_newudata (lua_State *L, size_t s, Table *e);
 LUAI_FUNC TString *luaS_newlstr (lua_State *L, const char *str, size_t l);
 
 
+#endif
 #endif

@@ -75,12 +75,6 @@
 // Global variables
 static SDL_Surface *main_surface;	// Main (display) surface
 
-// Dingoo software gammaramp -- Nigel
-uint8 gammatablered[32],  gammatablegreen[64], gammatableblue[32];
-
-bool do_dingoogamma = false;
-// END dingoo hack
-
 // Rendering buffer for the main view, the overhead map, and the terminals.
 // The HUD has a separate buffer.
 // It is initialized to NULL so as to allow its initing to be lazy.
@@ -128,14 +122,24 @@ static void DisplayMessages(SDL_Surface *s);
 static void DisplayNetMicStatus(SDL_Surface *s);
 static void DrawSurface(SDL_Surface *s, SDL_Rect &dest_rect, SDL_Rect &src_rect);
 static void clear_screen_margin();
+
+#ifdef HAVE_DINGOO // Dingoo software gammaramp -- Nigel
 void dingoo_swgammaramp(SDL_Surface *s); // Dingoo software gammmaramp hack -- Nigel
+uint8 gammatablered[32],  gammatablegreen[64], gammatableblue[32];
+bool do_dingoogamma = false;
+#endif // END dingoo hack
+
 
 // LP addition:
 void start_tunnel_vision_effect(
 	bool out)
 {
 	// LP change: doing this by setting targets
-  world_view->target_field_of_view = (out && NetAllowTunnelVision()) ? TUNNEL_VISION_FIELD_OF_VIEW : 
+  world_view->target_field_of_view = (out
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
+		  && NetAllowTunnelVision()
+#endif
+  	  ) ? TUNNEL_VISION_FIELD_OF_VIEW :
 		((current_player->extravision_duration) ? EXTRAVISION_FIELD_OF_VIEW : NORMAL_FIELD_OF_VIEW);
 }
 
@@ -182,9 +186,15 @@ void Screen::Initialize(screen_mode_data* mode)
 
 		// build a list of fullscreen modes
 		// list some modes
-/*
- *	Whatever - Nigel.
- * 		SDL_Rect **modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
+
+#ifdef HAVE_DINGOO
+		// I think this is all we need, and we don't need to write it, we're enforcing it. - Nigel.
+		m_modes.push_back(std::pair<int, int>(320, 240));
+		graphics_preferences->screen_mode.width = 320;
+		graphics_preferences->screen_mode.height = 240;
+		// End hack
+#else
+		SDL_Rect **modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
 		if (modes)
 		{
 			for (int i = 0; modes[i]; ++i)
@@ -255,12 +265,8 @@ void Screen::Initialize(screen_mode_data* mode)
 			graphics_preferences->screen_mode.width = 640;
 			graphics_preferences->screen_mode.height = 480;
 			write_preferences();
-		}*/
-		// I think this is all we need, and we don't need to write it, we're enforcing it. - Nigel.
-		m_modes.push_back(std::pair<int, int>(320, 240));
-		graphics_preferences->screen_mode.width = 320;
-		graphics_preferences->screen_mode.height = 240;
-		// End hack
+		}
+#endif
 	} else {
 
 		unload_all_collections();
@@ -271,7 +277,11 @@ void Screen::Initialize(screen_mode_data* mode)
 
 	// Set screen to 640x480 without OpenGL for menu
 	screen_mode = *mode;
+#ifdef HAVE_DINGOO
 	change_screen_mode(/*640, 480*/ 320, 240, bit_depth, true); // Not gonna happen. -- Nigel
+#else
+	change_screen_mode(640, 480, bit_depth, true);
+#endif
 	screen_initialized = true;
 
 }
@@ -288,12 +298,20 @@ int Screen::width()
 
 int Screen::window_height()
 {
-	return std::max(static_cast<short>(/*480*/240), screen_mode.height); // Doesn't need explanation -- Nigel
+#ifdef HAVE_DINGOO // Doesn't need explanation -- Nigel
+	return std::max(static_cast<short>(240), screen_mode.height);
+#else
+	return std::max(static_cast<short>(480), screen_mode.height);
+#endif
 }
 
 int Screen::window_width()
 {
-	return std::max(static_cast<short>(/*640*/320), screen_mode.width);
+#ifdef HAVE_DINGOO // Doesn't need explanation -- Nigel
+	return std::max(static_cast<short>(320), screen_mode.width);
+#else
+	return std::max(static_cast<short>(640), screen_mode.width);
+#endif
 }
 
 bool Screen::hud()
@@ -365,11 +383,8 @@ SDL_Rect Screen::view_rect()
 		r.y = (height() - window_height()) / 2 + (available_height - r.h) / 2;
 	}
 
-/*
- * 	This one gave me a massive headache! How the @)$(* did I set that by accident? 2 hours lost on
- * 'why isn't it rendering on the full area' so it's out, OUT :(. Nigel.
-
- 	if (fifty_percent())
+#ifndef HAVE_DINGOO // 	This one gave me a massive headache! How the @)$(* did I set that by accident? 2 hours lost on 'why isn't it rendering on the full area' so it's out, OUT :(. Nigel.
+	if (fifty_percent())
 	{
 		r.y += r.h / 4;
 		r.x += r.w / 4;
@@ -382,8 +397,8 @@ SDL_Rect Screen::view_rect()
 		r.x += r.w / 8;
 		r.w = r.w * 3 / 4;
 		r.h = r.h * 3 / 4;
-	}*/
-
+	}
+#endif
 	return r;
 }
 
@@ -431,9 +446,11 @@ SDL_Rect Screen::term_rect()
 	if (hud() && !lua_hud())
 		available_height -= hud_rect().h;
 	
-	//r.w = 640; No explanation here either -- Nigel
+#ifdef HAVE_DINGOO // No explanation here either, disabling termscaling as well -- Nigel
 	r.w = 320;
-/*	switch (screen_mode.term_scale_level)
+#else
+	r.w = 640;
+	switch (screen_mode.term_scale_level)
 	{
 		case 1:
 			if (available_height >= 640 && ww >= 1280)
@@ -442,7 +459,8 @@ SDL_Rect Screen::term_rect()
 		case 2:
 			r.w = std::min(ww, std::max(640, 2 * available_height));
 			break;
-	} */
+	}
+#endif
 	r.h = r.w / 2;
 	r.x = wx + (ww - r.w) / 2;
 	r.y = wy + (available_height - r.h) / 2;
@@ -454,8 +472,10 @@ SDL_Rect Screen::hud_rect()
 {
 	SDL_Rect r;
 
-	r.w = 320; // ... -- Nigel
-/*	r.w = 640;
+#ifdef HAVE_DINGOO
+	r.w = 320;
+#else
+	r.w = 640;
 	switch (screen_mode.hud_scale_level)
 	{
 		case 1:
@@ -465,8 +485,8 @@ SDL_Rect Screen::hud_rect()
 		case 2:
 			r.w = std::min(window_width(), std::max(640, 4 * window_height() / 3));
 			break;
-	}*/
-
+	}
+#endif
 	r.h = r.w / 4;
 	r.x = (width() - r.w) / 2;
 	r.y = window_height() - r.h + (height() - window_height()) / 2;
@@ -543,7 +563,7 @@ void enter_screen(void)
 	int h = scr->height();
 	int ww = scr->window_width();
 	int wh = scr->window_height();
-	
+#ifdef HAVE_LUA // gp2x/dingoo hack	-- I thought lua_term_rect was used outside of lua too, but this is not the case -- Nigel
 	scr->lua_clip_rect.x = 0;
 	scr->lua_clip_rect.y = 0;
 	scr->lua_clip_rect.w = w;
@@ -554,12 +574,13 @@ void enter_screen(void)
 	scr->lua_view_rect.w = scr->lua_map_rect.w = ww;
 	scr->lua_view_rect.h = scr->lua_map_rect.h = wh;
 	
-	scr->lua_term_rect.x = (w - /*640*/ 320) / 2; // Terminal size. I believe these are used even if there's no LUA stuff. - Nigel
-	scr->lua_term_rect.y = (h - /*320*/ 160) / 2;
-	scr->lua_term_rect.w = /*640*/ 320;
-	scr->lua_term_rect.h = /*320*/ 160;
+	scr->lua_term_rect.x = (w - 640) / 2;
+	scr->lua_term_rect.y = (h - 320) / 2;
+	scr->lua_term_rect.w = 640;
+	scr->lua_term_rect.h = 320;
 
 	L_Call_HUDResize();
+#endif
 }
 
 
@@ -570,9 +591,12 @@ void enter_screen(void)
 void exit_screen(void)
 {
 	// Return to 640x480 without OpenGL
-	// Hell no - Nigel
 	in_game = false;
+#ifdef HAVE_DINGOO 	// No we don't - Nigel
 	change_screen_mode(320, 240, bit_depth, true);
+#else
+	change_screen_mode(640, 480, bit_depth, true);
+#endif
 #ifdef HAVE_OPENGL
 	OGL_StopRun();
 #endif
@@ -617,9 +641,11 @@ static void change_screen_mode(int width, int height, int depth, bool nogl)
 		flags |= SDL_HWSURFACE | SDL_HWPALETTE;
 	}
 
-	// Attempting to force native. - Nigel	
-	//main_surface = SDL_SetVideoMode(vmode_width, vmode_height, depth, flags);
+#ifdef HAVE_DINGOO // Attempting to force native. - Nigel
 	main_surface = SDL_SetVideoMode(320, 240, depth, flags);
+#else
+	main_surface = SDL_SetVideoMode(vmode_width, vmode_height, depth, flags);
+#endif
 
 #ifdef HAVE_OPENGL
 #if SDL_VERSION_ATLEAST(1,2,6)
@@ -668,11 +694,21 @@ static void change_screen_mode(int width, int height, int depth, bool nogl)
 		SDL_FreeSurface(Term_Buffer);
 		Term_Buffer = NULL;
 	}
-#ifdef ALEPHONE_LITTLE_ENDIAN // More 640x480s to 320x240s... -- Nigel
-	Term_Buffer = SDL_CreateRGBSurface(SDL_SWSURFACE, /*640, 320*/ 320,160, 32, 0x000000ff,0x0000ff00, 0x00ff0000, 0xff000000);
+#ifdef HAVE_DINGOO // More 640x480s to 320x240s... -- Nigel
+#ifdef ALEPHONE_LITTLE_ENDIAN
+	Term_Buffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 320,160, 32, 0x000000ff,0x0000ff00, 0x00ff0000, 0xff000000);
 #else
-	Term_Buffer = SDL_CreateRGBSurface(SDL_SWSURFACE, /*640, 320*/ 320,160, 32, 0xff000000,0x00ff0000, 0x0000ff00, 0x000000ff);
+	Term_Buffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 320,160, 32, 0xff000000,0x00ff0000, 0x0000ff00, 0x000000ff);
 #endif
+#else
+#ifdef ALEPHONE_LITTLE_ENDIAN
+	Term_Buffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 320, 32, 0x000000ff,0x0000ff00, 0x00ff0000, 0xff000000);
+#else
+	Term_Buffer = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 320, 32, 0xff000000,0x00ff0000, 0x0000ff00, 0x000000ff);
+#endif
+#endif
+
+
 #ifdef HAVE_OPENGL
 	if (main_surface->flags & SDL_OPENGL) {
 		static bool gl_info_printed = false;
@@ -699,8 +735,10 @@ static void change_screen_mode(int width, int height, int depth, bool nogl)
 		{
 			prev_width = width;
 			prev_height = height;
+#ifdef HAVE_LUA // gp2x/dingoo hack
 			L_Call_HUDResize();
-	  }
+#endif
+		}
 	}
 }
 
@@ -726,7 +764,11 @@ void toggle_fullscreen(bool fs)
 		if (in_game)
 			change_screen_mode(&screen_mode, true);
 		else {
-		  change_screen_mode(/*640, 480*/ 320, 240, bit_depth, true); // And again -- Nigel
+#ifdef HAVE_DINGOO // And again -- Nigel
+		  change_screen_mode(320, 240, bit_depth, true);
+#else
+		  change_screen_mode(640, 480, bit_depth, true);
+#endif
 		  clear_screen();
 		}
 	}
@@ -739,7 +781,11 @@ void toggle_fill_the_screen(bool fill_the_screen)
 		if (in_game)
 			change_screen_mode(&screen_mode, true);
 		else {
-			change_screen_mode(/*640, 480,*/320, 240, bit_depth, true); // Same here -- Nigel
+#ifdef HAVE_DINGOO // ...
+			change_screen_mode(320, 240, bit_depth, true);
+#else
+			change_screen_mode(640, 480, bit_depth, true);
+#endif
 			clear_screen();
 		}
 	}
@@ -806,11 +852,13 @@ void render_screen(short ticks_elapsed)
 	if (world_view->terminal_mode_active) {
 		// Standard terminal size
 		ViewRect.x = ViewRect.y = 0;
-		// ViewRect.w = 640;
-		// ViewRect.h = 320;
-		ViewRect.w = 320; // Again - Nigel.
+#ifdef HAVE_DINGOO // Again... -- Nigel
+		ViewRect.w = 320;
 		ViewRect.h = 160;
-
+#else
+		ViewRect.w = 640;
+		ViewRect.h = 320;
+#endif
 		HighResolution = true;
 	} else if (world_view->overhead_map_active) {
 		// Fill the available space
@@ -860,6 +908,7 @@ void render_screen(short ticks_elapsed)
 
 		dirty_terminal_view(current_player_index);
 	} 
+#ifdef HAVE_OPENGL
 	else if (screen_mode.acceleration == _opengl_acceleration && clear_next_screen)
 	{
 		clear_screen(false);
@@ -876,6 +925,7 @@ void render_screen(short ticks_elapsed)
 			if (!world_view->overhead_map_active && !world_view->terminal_mode_active)
 				break;
 		case _no_acceleration:
+#endif
 			world_pixels_structure->width = world_view->screen_width;
 			world_pixels_structure->height = world_view->screen_height;
 			world_pixels_structure->bytes_per_row = world_pixels->pitch;
@@ -886,17 +936,20 @@ void render_screen(short ticks_elapsed)
 			//!! set world_pixels to VoidColor to avoid smearing?
 
 			precalculate_bitmap_row_addresses(world_pixels_structure);
+#ifdef HAVE_OPENGL
 			break;
 		default:
 			assert(false);
 			break;
 	}
-
+#endif
 	world_view->origin = current_player->camera_location;
 	world_view->origin_polygon_index = current_player->camera_polygon_index;
 
 	// Script-based camera control
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	if (!UseLuaCameras())
+#endif
 		world_view->show_weapons_in_hand = !ChaseCam_GetPosition(world_view->origin, world_view->origin_polygon_index, world_view->yaw, world_view->pitch);
 
 #ifdef HAVE_OPENGL
@@ -911,12 +964,12 @@ void render_screen(short ticks_elapsed)
 	Rect vr = {ViewRect.y, ViewRect.x, ViewRect.y + ViewRect.h, ViewRect.x + ViewRect.w};
 	OGL_SetWindow(sr, vr, true);
 	
-#endif
 
     // clear Lua drawing from previous frame
     // (GL must do this before render_view)
     if (screen_mode.acceleration == _opengl_acceleration && Screen::instance()->lua_hud())
         clear_screen_margin();
+#endif
     
 	// Render world view
 	render_view(world_view, world_pixels_structure);
@@ -928,8 +981,10 @@ void render_screen(short ticks_elapsed)
     
 	// Render crosshairs
 	if (!world_view->overhead_map_active && !world_view->terminal_mode_active)
-	  if (NetAllowCrosshair())
-	    if (Crosshairs_IsActive())
+#if !defined(DISABLE_NETWORKING) // dingoo no network thing
+		if (NetAllowCrosshair())
+#endif
+			if (Crosshairs_IsActive())
 #ifdef HAVE_OPENGL
 			if (!OGL_RenderCrosshairs())
 #endif
@@ -956,8 +1011,8 @@ void render_screen(short ticks_elapsed)
 
 	// If the main view is not being rendered in software but OpenGL is active,
 	// then blit the software rendering to the screen
-	if (screen_mode.acceleration == _opengl_acceleration) {
 #ifdef HAVE_OPENGL
+	if (screen_mode.acceleration == _opengl_acceleration) {
 		if (Screen::instance()->hud()) {
 			if (Screen::instance()->lua_hud())
 				Lua_DrawHUD(ticks_elapsed);
@@ -978,18 +1033,21 @@ void render_screen(short ticks_elapsed)
 			Term_Blitter.Draw(Screen::instance()->term_rect());
 		}
 
-#endif
 	} else {
+#endif
 		// Update world window
 		if (!world_view->terminal_mode_active)
 			update_screen(BufferRect, ViewRect, HighResolution);
 		
 		// Update HUD
+#ifdef HAVE_LUA // gp2x/dingoo hack
 		if (Screen::instance()->lua_hud())
 		{
 			Lua_DrawHUD(ticks_elapsed);
 		}
-		else if (HUD_RenderRequest) {
+		else
+#endif
+		if (HUD_RenderRequest) {
 			SDL_Rect src_rect = { 0, 320, 640, 160 };
 			DrawSurface(HUD_Buffer, HUD_DestRect, src_rect);
 			HUD_RenderRequest = false;
@@ -1013,9 +1071,9 @@ void render_screen(short ticks_elapsed)
 		{
 			SDL_UpdateRects(main_surface, 1, &ViewRect);
 		}
+#ifdef HAVE_OPENGL
 	}
 
-#ifdef HAVE_OPENGL
 	// Swap OpenGL double-buffers
 	if (screen_mode.acceleration == _opengl_acceleration)
 		OGL_SwapBuffers();
@@ -1049,20 +1107,20 @@ static inline void quadruple_surface(const T *src, int src_pitch, T *dst, int ds
 
 static void update_screen(SDL_Rect &source, SDL_Rect &destination, bool hi_rez)
 {
+#ifdef HAVE_DINGOO
 	// BEGIN Dingoo software gamma hack. For now, we won't do the whole screen but only the game world, this saves processing -- Nigel
 	// Small update on that, processing takes not too much speed. Should be enabled full screen and in the menus too in the future.
-	if (do_dingoogamma)
+	if (do_dingoogamma) {
 		dingoo_swgammaramp(world_pixels);
+	}
 	// END Dingoo gamma hack
-
+#endif
 	if (hi_rez) {
 		SDL_BlitSurface(world_pixels, NULL, main_surface, &destination);
-	}
-	else {
-		if (SDL_MUSTLOCK(main_surface))
-		{
-			if (SDL_LockSurface(main_surface) < 0) return;
-		}
+	} else {
+	  if (SDL_MUSTLOCK(main_surface)) {
+	    if (SDL_LockSurface(main_surface) < 0) return;
+	  }
 		switch (world_pixels->format->BytesPerPixel) {
 			case 1:
 				quadruple_surface((pixel8 *)world_pixels->pixels, world_pixels->pitch, (pixel8 *)main_surface->pixels, main_surface->pitch, destination);
@@ -1120,8 +1178,10 @@ void initialize_gamma(void)
 
 void restore_gamma(void)
 {
-    //if (!option_nogamma && bit_depth > 8 && default_gamma_inited)
-    //    SDL_SetGammaRamp(default_gamma_r, default_gamma_g, default_gamma_b); -- Doesn't do anything, might as well comment it out -- Nigel
+#ifndef HAVE_DINGOO // -- Doesn't do anything for Dingoo, might as well comment it out -- Nigel
+    if (!option_nogamma && bit_depth > 8 && default_gamma_inited)
+        SDL_SetGammaRamp(default_gamma_r, default_gamma_g, default_gamma_b);
+#endif
 }
 
 void build_direct_color_table(struct color_table *color_table, short bit_depth)
@@ -1177,46 +1237,51 @@ void animate_screen_clut(struct color_table *color_table, bool full_screen)
 		SDL_SetPalette(main_surface, SDL_PHYSPAL, colors, 0, 256); // 8 bit flashes work -- Nigel
 	} else if (!option_nogamma)
 	{
-	// Begin Dingoo software gammaramp hack -- Nigel
-		// We can't do a memcmp on the arrays I'm afraid, that thing is an object. This'll work to see if we're not setting default gamma
-		// (saves 3-4 fps in no-screen-color-overlay areas, that's what the swgamma code takes away).
-		do_dingoogamma = false;
-		for (int i=0; i < color_table->color_count; i+=16) { // Little cheating here, 16 loops max
-			if (	!(color_table->colors[i].red == default_gamma_r[i]) ||
-					!(color_table->colors[i].green == default_gamma_g[i]) ||
-					!(color_table->colors[i].blue == default_gamma_b[i]))
-			{
-				do_dingoogamma = true;
-				break;
-			}
-		}
+#ifdef HAVE_DINGOO // Dingoo software gammaramp hack -- Nigel
+	// Do not apply if no change (saves around 20% in no-screen-color-overlay areas, that's what the swgamma code takes away).
+	do_dingoogamma = false;
 
-		if (do_dingoogamma)
+	if (memcmp(color_table, uncorrected_color_table, sizeof(struct color_table)) != 0)
+	{
+		do_dingoogamma = true;
+	}
+/*	for (int i=0; i < color_table->color_count; i+=32) { // Little cheating here, 8 loops max
+		// You could use world_color_table here to get around having to disable gamma_correct_color_table but I suppose the other effects don't scale then :P
+		if (	!(color_table->colors[i].red == default_gamma_r[i]) ||
+				!(color_table->colors[i].green == default_gamma_g[i]) ||
+				!(color_table->colors[i].blue == default_gamma_b[i]))
 		{
-			Uint8 c = 0; // We only need 32 out of 256
-			// Red and blue are 5 bit instead of 16.
-			for (int i=0; i < color_table->color_count; i+=8) {
-				gammatablered[c] = (color_table->colors[i].red >> 11); // This should give a 5 bit int
-				gammatableblue[c] = (color_table->colors[i].blue >> 11);
-				c++;
-			}
-			// Green, on the other hand, is 6 bit in RGB565/16 bit color.
-			c=0;  // We only need 64 out of 256
-			for (int i=0; i < color_table->color_count; i+=4) {
-				gammatablegreen[c] = (color_table->colors[i].green >> 10); // And this 6 bit.
-				c++;
-			}
+			do_dingoogamma = true;
+			break;
 		}
-/*		uint16 red[256], green[256], blue[256]; // Moved to global space, Dingoo sw gammaramp - Nigel
+	}*/
+
+	if (do_dingoogamma)
+	{
+		Uint8 c = 0; // We only need 32 out of 256
+		// Red and blue are 5 bit instead of 16.
+		for (int i=0; i < color_table->color_count; i+=8) {
+			gammatablered[c] = (color_table->colors[i].red >> 11); // This should give a 5 bit int
+			gammatableblue[c] = (color_table->colors[i].blue >> 11);
+			c++;
+		}
+		// Green, on the other hand, is 6 bit in RGB565/16 bit color.
+		c=0;  // We only need 64 out of 256
+		for (int i=0; i < color_table->color_count; i+=4) {
+			gammatablegreen[c] = (color_table->colors[i].green >> 10); // And this 6 bit.
+			c++;
+		}
+	}
+#else
+		uint16 red[256], green[256], blue[256];
 		for (int i=0; i<color_table->color_count; i++) {
 			red[i] = color_table->colors[i].red;
 			green[i] = color_table->colors[i].green;
 			blue[i] = color_table->colors[i].blue;
 		}
 		if (!option_nogamma)
-			SDL_SetGammaRamp(red, green, blue); // Gets executed without error, but doesn't work on the dingoo, nor does SDL_SetGamma() ffs!! -Nigel
-*/
-	// END Dingoo hack
+			SDL_SetGammaRamp(red, green, blue);
+#endif
 	}
 }
 
@@ -1225,7 +1290,7 @@ void assert_world_color_table(struct color_table *interface_color_table, struct 
 	if (interface_bit_depth == 8) {
 		SDL_Color colors[256];
 		build_sdl_color_table(interface_color_table, colors);
-		SDL_SetPalette(main_surface, SDL_LOGPAL, colors, 0, 256); // 8 bit flashes work -- Nigel
+		SDL_SetPalette(main_surface, SDL_LOGPAL, colors, 0, 256);
 		if (HUD_Buffer)
 			SDL_SetColors(HUD_Buffer, colors, 0, 256);
 	}
@@ -1441,8 +1506,11 @@ void DrawSurface(SDL_Surface *s, SDL_Rect &dest_rect, SDL_Rect &src_rect)
 		{
 			double x_scale = dest_rect.w / (double) src_rect.w;
 			double y_scale = dest_rect.h / (double) src_rect.h;
-			// surface = rescale_surface(s, static_cast<int>(s->w * x_scale), static_cast<int>(s->h * y_scale));
-			surface = dingoo_downscale(s); // HUD hack -- Nigel. Not necessary but nice for smooth 16 bit and faster for 8.
+#ifdef HAVE_DINGOO
+			surface = dingoo_hud_downscale(s); // HUD hack -- Nigel. Not necessary but nice for smooth 16 bit.
+#else
+			surface = rescale_surface(s, static_cast<int>(s->w * x_scale), static_cast<int>(s->h * y_scale));
+#endif
 			new_src_rect.x = static_cast<Sint16>(new_src_rect.x * x_scale);
 			new_src_rect.y = static_cast<Sint16>(new_src_rect.y * y_scale);
 			new_src_rect.w = static_cast<Uint16>(new_src_rect.w * x_scale);
@@ -1528,18 +1596,31 @@ void clear_screen_margin()
     }
 }
 
+#ifdef HAVE_DINGOO
 // START Dingoo gamma function: Apply software gammaramp to a 16 bit surface (no endianess check!). Assumes gammatables are already prepared. -- Nigel
 // NOTE: This could be done using only one pointer. Untested, doubt it would matter much if at all.
 void dingoo_swgammaramp(SDL_Surface *s)
 {
 	Uint32 pixelcount = s->w * s->h; // Total pixel count, will exceed 320x160 if HUD is disabled so 32 bit int is needed for full 320x240.
-	Uint16* Source = (Uint16 *)s->pixels;
+
+	// OK, only one pointer then. Doesn't appear to improve anything performance wise though.
+	Uint16* Pixel = (Uint16 *)s->pixels;
+	for (int curpixel = 0; curpixel < pixelcount; curpixel++)
+	{
+		*Pixel = (gammatablered[*Pixel >> 11 & 0x1F] << 11 | gammatablegreen[*Pixel >> 5 & 0x3F] << 5 | gammatableblue[*Pixel & 0x1F]);
+		Pixel++;
+	}
+
+/* Same as above, more readable -- Nigel
+ *
+ 	Uint16* Source = (Uint16 *)s->pixels;
 	Uint16* Target = (Uint16 *)s->pixels;
 
 	for (int curpixel = 0; curpixel < pixelcount; curpixel++)
 	{
 		*Target = (gammatablered[*Source >> 11 & 0x1F] << 11 | gammatablegreen[*Source >> 5 & 0x3F] << 5 | gammatableblue[*Source & 0x1F]);
 		Source++; Target++;
-	}
+	}*/
 }
 // END Dingoo gamma functions
+#endif

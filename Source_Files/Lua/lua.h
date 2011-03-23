@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Lua - An Extensible Extension Language
@@ -382,4 +384,5 @@ struct lua_Debug {
 ******************************************************************************/
 
 
+#endif
 #endif

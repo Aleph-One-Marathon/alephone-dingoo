@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Library for Table Manipulation
@@ -276,3 +278,4 @@ LUALIB_API int luaopen_table (lua_State *L) {
   return 1;
 }
 
+#endif

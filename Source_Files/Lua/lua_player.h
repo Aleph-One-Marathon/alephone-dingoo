@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 #ifndef __LUA_PLAYER_H
 #define __LUA_PLAYER_H
 
@@ -46,4 +48,5 @@ int Lua_Player_register (lua_State *L);
 
 #endif
 
+#endif
 #endif

@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 LUA_MAP.CPP
 
@@ -2817,3 +2819,4 @@ static void compatibility(lua_State *L)
 
 #endif
 
+#endif

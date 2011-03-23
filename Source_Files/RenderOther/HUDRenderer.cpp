@@ -50,10 +50,11 @@ static inline void offset_rect(screen_rectangle *rect, short dx, short dy)
 bool HUD_Class::update_everything(short time_elapsed)
 {
 	ForceUpdate = false;
-
+#include "config.h"
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	if (!LuaTexturePaletteSize())
 	{
-
+#endif
 		update_motion_sensor(time_elapsed);
 		update_inventory_panel((time_elapsed == NONE) ? true : false);
 		update_weapon_panel((time_elapsed == NONE) ? true : false);
@@ -64,6 +65,7 @@ bool HUD_Class::update_everything(short time_elapsed)
 		// Draw the message area if the player count is greater than one
 		if (dynamic_world->player_count > 1)
 			draw_message_area(time_elapsed);
+#ifdef HAVE_LUA // gp2x/dingoo hack
 	}
 	else
 	{
@@ -109,7 +111,7 @@ bool HUD_Class::update_everything(short time_elapsed)
 
 		ForceUpdate = true;
 	}
-
+#endif
 	return ForceUpdate;
 }
 

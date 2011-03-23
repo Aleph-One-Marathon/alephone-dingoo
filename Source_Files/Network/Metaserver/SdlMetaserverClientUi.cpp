@@ -25,6 +25,7 @@
 	Split out from metaserver_dialogs.cpp.
  */
 
+#include "config.h"
 #if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"

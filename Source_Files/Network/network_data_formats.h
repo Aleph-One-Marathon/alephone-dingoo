@@ -34,6 +34,8 @@
 
 #ifndef	NETWORK_DATA_FORMATS_H
 #define	NETWORK_DATA_FORMATS_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include	"cseries.h"		// Need ALEPHONE_LITTLE_ENDIAN, if appropriate.
 #include	"network.h"
@@ -123,5 +125,5 @@ struct network_audio_header_NET {
 
 extern void netcpy(network_audio_header_NET* dest, const network_audio_header* src);
 extern void netcpy(network_audio_header* dest, const network_audio_header_NET* src);
-
+#endif //disable_networking
 #endif//NETWORK_DATA_FORMATS_H

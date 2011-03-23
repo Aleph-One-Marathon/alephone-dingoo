@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Standard library for string operations and pattern-matching
@@ -866,3 +868,4 @@ LUALIB_API int luaopen_string (lua_State *L) {
   return 1;
 }
 
+#endif

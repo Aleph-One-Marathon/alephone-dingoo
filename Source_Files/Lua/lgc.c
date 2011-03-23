@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Garbage Collector
@@ -709,3 +711,4 @@ void luaC_linkupval (lua_State *L, UpVal *uv) {
   }
 }
 
+#endif

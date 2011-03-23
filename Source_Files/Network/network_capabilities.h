@@ -22,6 +22,8 @@
 
 #ifndef NETWORK_CAPABILITIES_H
 #define NETWORK_CAPABILITIES_H
+#include "config.h"
+#if !defined(DISABLE_NETWORKING)
 
 #include "cseries.h"
 
@@ -61,6 +63,6 @@ class Capabilities : public capabilities_t
     return capabilities_t::operator[](k);
   }
 };
-
+#endif //disable_networking
 #endif
 

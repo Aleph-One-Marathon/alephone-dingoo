@@ -1,3 +1,6 @@
+#include "config.h"
+#ifdef HAVE_LUA
+
 #ifndef __LUA_HUD_OBJECTS_H
 #define __LUA_HUD_OBJECTS_H
 
@@ -76,4 +79,5 @@ int Lua_HUDObjects_register(lua_State *L);
 
 #endif
 
+#endif
 #endif

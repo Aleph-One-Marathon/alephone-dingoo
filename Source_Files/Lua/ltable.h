@@ -1,3 +1,5 @@
+#include "config.h"
+#ifdef HAVE_LUA
 /*
 ** $Id$
 ** Lua tables (hash)
@@ -37,4 +39,5 @@ LUAI_FUNC int luaH_isdummy (Node *n);
 #endif
 
 
+#endif
 #endif
